@@ -7,4 +7,5 @@ edition = "2021"
 env_logger = "0.11.5"
 log = "0.4.22"
 wgpu = "22.1.0"
-winit = { version = "0.30.5", features = ["rwh_05"]  }
+winit = "0.30.5"
+pollster = "0.3"
