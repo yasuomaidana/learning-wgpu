@@ -1,27 +1,41 @@
-use std::sync::Arc;
 use pollster::FutureExt;
+use std::sync::Arc;
 use wgpu::{Adapter, Device, Instance, PresentMode, Queue, Surface, SurfaceCapabilities};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
-struct State {
-    surface: Surface<'static>,
+struct State<'a> {
+    surface: Surface<'a>,
     device: Device,
     queue: Queue,
     config: wgpu::SurfaceConfiguration,
-
     size: PhysicalSize<u32>,
+
     window: Arc<Window>,
 }
 
-impl State {
-    pub fn new(window: Window) -> Self {
+impl<'a> State<'a> {
+    pub fn new(window: Window) -> State<'a> {
         let window_arc = Arc::new(window);
         let size = window_arc.inner_size();
+        // Instance is used to create surfaces and adapters
         let instance = Self::create_gpu_instance();
-        let surface = instance.create_surface(window_arc.clone()).unwrap();
+
+        // The surface is the "window" that we will render the
+        // graphics to
+        // It is the part of the window that we draw to.
+        let surface = instance
+            .create_surface(window_arc.clone())
+            .expect("Failed to create surface");
+
+        // Adapter is a handle for our actual graphics card
         let adapter = Self::create_adapter(instance, &surface);
+
+        // Device is the handle to the GPU. Responsible for the creation of most rendering and compute resources.
+        // Queue is the handle to the command queue. Responsible for submitting commands to the GPU.
         let (device, queue) = Self::create_device(&adapter);
+
+        // SurfaceCapabilities are the capabilities of the surface
         let surface_caps = surface.get_capabilities(&adapter);
         let config = Self::create_surface_config(size, surface_caps);
         surface.configure(&device, &config);
@@ -77,14 +91,17 @@ impl State {
     fn create_adapter(instance: Instance, surface: &Surface) -> Adapter {
         instance
             .request_adapter(&wgpu::RequestAdapterOptions {
-                power_preference: wgpu::PowerPreference::default(),
+                power_preference: wgpu::PowerPreference::HighPerformance,
+                // power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
             })
+            // Look for wasm compatible adapter we shouldn't use block_on
             .block_on()
             .unwrap()
     }
 
+    // Here we can add the WASM specific code
     fn create_gpu_instance() -> Instance {
         Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::PRIMARY,
@@ -104,7 +121,10 @@ impl State {
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let output = self.surface.get_current_texture().unwrap();
+        let output = self
+            .surface
+            .get_current_texture()
+            .expect("Failed to get texture");
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
