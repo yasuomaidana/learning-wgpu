@@ -1,6 +1,6 @@
 use crate::state::State;
 use winit::application::ApplicationHandler;
-use winit::event::WindowEvent;
+use winit::event::{MouseButton, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
 
@@ -40,6 +40,21 @@ impl ApplicationHandler for StateApplication<'_> {
                 }
                 WindowEvent::RedrawRequested => {
                     self.state.as_mut().unwrap().render().unwrap();
+                }
+                WindowEvent::MouseInput { button, .. } => {
+                    match button {
+                        MouseButton::Left => {
+                            println!("Left mouse button clicked!");
+                        }
+                        MouseButton::Right => {
+                            println!("Right mouse button clicked!");
+                        }
+                        // MouseButton::Middle => {}
+                        // MouseButton::Back => {}
+                        // MouseButton::Forward => {}
+                        MouseButton::Other(_) => {}
+                        _ => {}
+                    } 
                 }
                 _ => {}
             }
