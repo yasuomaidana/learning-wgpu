@@ -4,7 +4,7 @@ use wgpu::{Adapter, Device, Instance, PresentMode, Queue, Surface, SurfaceCapabi
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
-struct State<'a> {
+pub struct State<'a> {
     surface: Surface<'a>,
     device: Device,
     queue: Queue,
