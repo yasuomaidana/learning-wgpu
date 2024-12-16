@@ -2,6 +2,7 @@ use pollster::FutureExt;
 use std::sync::Arc;
 use wgpu::{Adapter, Device, Instance, PresentMode, Queue, Surface, SurfaceCapabilities};
 use winit::dpi::PhysicalSize;
+use winit::event::WindowEvent;
 use winit::window::Window;
 
 pub struct State<'a> {
@@ -10,7 +11,7 @@ pub struct State<'a> {
     queue: Queue,
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
-
+    blue: f64,
     window: Arc<Window>,
 }
 
@@ -46,6 +47,7 @@ impl<'a> State<'a> {
             queue,
             config,
             size,
+            blue: 0.0,
             window: window_arc,
         }
     }
@@ -136,6 +138,8 @@ impl<'a> State<'a> {
             });
 
         {
+            println!("Rendering from state!");
+            println!("Blue: {}", self.blue);
             let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -143,9 +147,9 @@ impl<'a> State<'a> {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 1.0,
+                            r: 0.1,
                             g: 0.2,
-                            b: 0.3,
+                            b: self.blue,
                             a: 1.0,
                         }),
                         store: wgpu::StoreOp::Store,
@@ -165,5 +169,36 @@ impl<'a> State<'a> {
 
     pub fn window(&self) -> &Window {
         &self.window
+    }
+
+    /// Handles input events and returns a boolean indicating whether the event has been fully processed.
+    ///
+    /// If the method returns `true`, the main loop won't process the event any further.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - A reference to the `WindowEvent` that needs to be processed.
+    ///
+    /// # Returns
+    ///
+    /// * `bool` - `true` if the event has been fully processed, `false` otherwise.
+    pub(crate) fn input(&mut self, event: &WindowEvent) -> bool {
+        match event {
+            
+            WindowEvent::TouchpadPressure { pressure , .. } => {
+                self.blue = *pressure as f64;
+                println!("Pressure: {}", pressure);
+                return true;
+            }
+            _ => {
+                
+            }
+        }
+        false
+    }
+    
+    pub fn update(&mut self) {
+        // Update the state of the application
+        self.render().unwrap();
     }
 }

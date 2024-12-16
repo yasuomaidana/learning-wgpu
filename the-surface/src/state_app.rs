@@ -28,9 +28,11 @@ impl ApplicationHandler for StateApplication<'_> {
         window_id: WindowId,
         event: WindowEvent,
     ) {
+        
+        let read_input = self.state.as_mut().unwrap().input(&event);
         let window = self.state.as_ref().unwrap().window();
-
-        if window.id() == window_id {
+        
+        if window.id() == window_id && !read_input {
             match event {
                 WindowEvent::CloseRequested => {
                     event_loop.exit();
@@ -39,6 +41,7 @@ impl ApplicationHandler for StateApplication<'_> {
                     self.state.as_mut().unwrap().resize(physical_size);
                 }
                 WindowEvent::RedrawRequested => {
+                    self.state.as_mut().unwrap().update();
                     self.state.as_mut().unwrap().render().unwrap();
                 }
                 WindowEvent::MouseInput { button, .. } => {
@@ -58,6 +61,11 @@ impl ApplicationHandler for StateApplication<'_> {
                 }
                 _ => {}
             }
+            
         }
+        if read_input { 
+            self.state.as_mut().unwrap().update();
+            self.state.as_mut().unwrap().render().unwrap();
+        } 
     }
 }
