@@ -7,17 +7,21 @@ use winit::{
     window::{Window, WindowId},
 };
 
-pub struct State<'a> {
-    instance: wgpu::Instance,
-    surface: wgpu::Surface<'a>,
+//pub struct State<'a> {
+pub struct State {    
+    // instance: wgpu::Instance,
+    // surface: wgpu::Surface<'a>,
 }
 
-impl<'a> State<'a> {
-    pub async fn new(window: Arc<Window>) -> State<'a> {
-        let instance = wgpu::Instance::default();
-        let surface = instance.create_surface(Arc::clone(&window)).unwrap();
-
-        Self { instance, surface }
+//impl<'a> State<'a> {
+impl State {    
+    //pub async fn new(window: Arc<Window>) -> State<'a> {
+pub async fn new(_window: Arc<Window>) -> State {
+        // let instance = wgpu::Instance::default();
+        // let surface = instance.create_surface(Arc::clone(&window)).unwrap();
+        // 
+        // Self { instance, surface }
+        Self{}
     }
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
@@ -32,12 +36,15 @@ impl<'a> State<'a> {
 }
 
 #[derive(Default)]
-pub struct App<'a> {
+//pub struct App<'a> {
+pub struct App {
     window: Option<Arc<Window>>,
-    state: Option<State<'a>>,
+    // state: Option<State<'a>>,
+    state: Option<State>,
 }
 
-impl ApplicationHandler for App<'_> {
+//impl ApplicationHandler for App<'_> {
+impl ApplicationHandler for App {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         println!("App resumed");
         if self.window.is_none() {
@@ -76,9 +83,10 @@ impl ApplicationHandler for App<'_> {
                 println!("Cursor left");
             }
             WindowEvent::KeyboardInput {
-                device_id,
-                event,
-                is_synthetic,
+                // device_id,
+                // event,
+                // is_synthetic,
+                event,..
             } => {
                 let a = match event.text {
                     Some(a) => a.to_string(),
@@ -98,11 +106,11 @@ impl ApplicationHandler for App<'_> {
         }
     }
 
-    fn suspended(&mut self, event_loop: &ActiveEventLoop) {
+    fn suspended(&mut self, _event_loop: &ActiveEventLoop) {
         println!("App suspended");
     }
 
-    fn exiting(&mut self, event_loop: &ActiveEventLoop) {
+    fn exiting(&mut self, _event_loop: &ActiveEventLoop) {
         println!("App exiting");
     }
 }
