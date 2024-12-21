@@ -6,11 +6,15 @@ use winit::window::{Window, WindowId};
 
 pub struct StateApplication<'a> {
     state: Option<State<'a>>,
+    event_handler: EventHandler,
 }
 
 impl<'a> StateApplication<'a> {
     pub fn new() -> StateApplication<'a> {
-        StateApplication { state: None }
+        StateApplication {
+            state: None,
+            event_handler: EventHandler::new(),
+        }
     }
 }
 
@@ -28,10 +32,9 @@ impl ApplicationHandler for StateApplication<'_> {
         window_id: WindowId,
         event: WindowEvent,
     ) {
-        
-        let read_input = self.state.as_mut().unwrap().input(&event);
+        let read_input = self.event_handler.input(event.clone());
         let window = self.state.as_ref().unwrap().window();
-        
+
         if window.id() == window_id && !read_input {
             match event {
                 WindowEvent::CloseRequested => {
@@ -44,28 +47,20 @@ impl ApplicationHandler for StateApplication<'_> {
                     self.state.as_mut().unwrap().update();
                     self.state.as_mut().unwrap().render().unwrap();
                 }
-                WindowEvent::MouseInput { button, .. } => {
-                    match button {
-                        MouseButton::Left => {
-                            println!("Left mouse button clicked!");
-                        }
-                        MouseButton::Right => {
-                            println!("Right mouse button clicked!");
-                        }
-                        // MouseButton::Middle => {}
-                        // MouseButton::Back => {}
-                        // MouseButton::Forward => {}
-                        MouseButton::Other(_) => {}
-                        _ => {}
-                    } 
-                }
                 _ => {}
             }
-            
         }
-        if read_input { 
-            self.state.as_mut().unwrap().update();
-            self.state.as_mut().unwrap().render().unwrap();
-        } 
+        if read_input {
+            let current_stored = self.event_handler.get_current_event();
+            if let Some(current) = current_stored{
+                match current { 
+                    WindowEvent::TouchpadPressure { pressure, .. } => {
+                        println!("Pressure: {}", pressure);
+                    }
+                    _ => {}
+                }
+            }
+            self.event_handler.clear();
+        }
     }
 }
