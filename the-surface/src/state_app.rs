@@ -51,14 +51,14 @@ impl ApplicationHandler for StateApplication<'_> {
             }
         }
         let current_stored = self.event_handler.get_current_event();
-        
-        if let Some(current) = current_stored{
+
+        if let Some(current) = current_stored {
             let redraw = self.state.as_mut().unwrap().input(current);
             if redraw {
                 self.state.as_mut().unwrap().update();
             }
         }
-        
+
         if read_input {
             self.event_handler.clear();
         }

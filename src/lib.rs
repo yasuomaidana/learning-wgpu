@@ -8,20 +8,20 @@ use winit::{
 };
 
 //pub struct State<'a> {
-pub struct State {    
+pub struct State {
     // instance: wgpu::Instance,
     // surface: wgpu::Surface<'a>,
 }
 
 //impl<'a> State<'a> {
-impl State {    
+impl State {
     //pub async fn new(window: Arc<Window>) -> State<'a> {
-pub async fn new(_window: Arc<Window>) -> State {
+    pub async fn new(_window: Arc<Window>) -> State {
         // let instance = wgpu::Instance::default();
         // let surface = instance.create_surface(Arc::clone(&window)).unwrap();
-        // 
+        //
         // Self { instance, surface }
-        Self{}
+        Self {}
     }
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
@@ -86,7 +86,8 @@ impl ApplicationHandler for App {
                 // device_id,
                 // event,
                 // is_synthetic,
-                event,..
+                event,
+                ..
             } => {
                 let a = match event.text {
                     Some(a) => a.to_string(),
