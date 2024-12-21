@@ -138,8 +138,7 @@ impl<'a> State<'a> {
             });
 
         {
-            println!("Rendering from state!");
-            println!("Blue: {}", self.blue);
+            // println!("Blue: {}", self.blue);
             let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -184,19 +183,16 @@ impl<'a> State<'a> {
     /// * `bool` - `true` if the event has been fully processed, `false` otherwise.
     pub(crate) fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
-            
-            WindowEvent::TouchpadPressure { pressure , .. } => {
+            WindowEvent::TouchpadPressure { pressure, .. } => {
                 self.blue = *pressure as f64;
                 println!("Pressure: {}", pressure);
                 return true;
             }
-            _ => {
-                
-            }
+            _ => {}
         }
         false
     }
-    
+
     pub fn update(&mut self) {
         // Update the state of the application
         self.render().unwrap();

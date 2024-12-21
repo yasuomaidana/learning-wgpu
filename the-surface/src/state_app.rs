@@ -1,6 +1,7 @@
+use crate::event_handler::event_handler::EventHandler;
 use crate::state::State;
 use winit::application::ApplicationHandler;
-use winit::event::{MouseButton, WindowEvent};
+use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
 
@@ -44,22 +45,21 @@ impl ApplicationHandler for StateApplication<'_> {
                     self.state.as_mut().unwrap().resize(physical_size);
                 }
                 WindowEvent::RedrawRequested => {
-                    self.state.as_mut().unwrap().update();
                     self.state.as_mut().unwrap().render().unwrap();
                 }
                 _ => {}
             }
         }
-        if read_input {
-            let current_stored = self.event_handler.get_current_event();
-            if let Some(current) = current_stored{
-                match current { 
-                    WindowEvent::TouchpadPressure { pressure, .. } => {
-                        println!("Pressure: {}", pressure);
-                    }
-                    _ => {}
-                }
+        let current_stored = self.event_handler.get_current_event();
+        
+        if let Some(current) = current_stored{
+            let redraw = self.state.as_mut().unwrap().input(current);
+            if redraw {
+                self.state.as_mut().unwrap().update();
             }
+        }
+        
+        if read_input {
             self.event_handler.clear();
         }
     }

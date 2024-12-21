@@ -38,14 +38,17 @@ impl EventHandler {
                 } => match prev_mouse_input {
                     // Previous event was a left mouse button click
                     MouseButton::Left => match event {
-                        WindowEvent::TouchpadPressure { pressure,.. } => {
-                            if{ pressure > 0.0 } {
+                        WindowEvent::TouchpadPressure { pressure, .. } => {
+                            if pressure > 0.0 {
                                 self.current_event = Some(event);
                             }
                             false
                         }
                         WindowEvent::MouseInput { button, .. } => match button {
-                            MouseButton::Left => { println!("Left mouse clicked out 😀!"); true },
+                            MouseButton::Left => {
+                                println!("Left mouse clicked out 😀!");
+                                true
+                            }
                             _ => false,
                         },
                         _ => false,
@@ -64,7 +67,7 @@ impl EventHandler {
         self.previous_event = None;
         self.current_event = None;
     }
-    
+
     pub fn get_current_event(&self) -> Option<&WindowEvent> {
         self.current_event.as_ref()
     }
