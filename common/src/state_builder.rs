@@ -56,7 +56,22 @@ pub fn create_adapter(instance: Instance, surface: &Surface) -> Adapter {
         .unwrap()
 }
 
-// Creates RenderPass object which records a single render pass.
+/// Creates a `RenderPass` object which records a single render pass.
+///
+/// # Arguments
+///
+/// * `encoder` - A mutable reference to the `CommandEncoder` which will record the commands.
+/// * `view` - A reference to the `TextureView` that the render pass will render to.
+/// * `color` - The `Color` to clear the render target with.
+///
+/// # Returns
+///
+/// * `RenderPass<'b>` - A `RenderPass` object that records the commands for a single render pass.
+///
+/// # Lifetimes
+///
+/// * `'b` - The lifetime of the `RenderPass`, which must be within the lifetime of the `CommandEncoder`.
+
 pub fn create_render_pass<'b>(
     encoder: &'b mut CommandEncoder,
     view: &TextureView,
