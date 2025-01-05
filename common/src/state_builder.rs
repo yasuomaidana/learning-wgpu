@@ -1,5 +1,8 @@
 use pollster::FutureExt;
-use wgpu::{Adapter, Device, Instance, PresentMode, Queue, Surface, SurfaceCapabilities};
+use wgpu::{
+    Adapter, Color, CommandEncoder, Device, Instance, PresentMode, Queue, RenderPass, Surface,
+    SurfaceCapabilities, TextureView,
+};
 use winit::dpi::PhysicalSize;
 
 pub fn create_surface_config(
@@ -51,4 +54,34 @@ pub fn create_adapter(instance: Instance, surface: &Surface) -> Adapter {
         // Look for wasm compatible adapter we shouldn't use block_on
         .block_on()
         .unwrap()
+}
+
+// Creates RenderPass object which records a single render pass.
+pub fn create_render_pass<'b>(
+    encoder: &'b mut CommandEncoder,
+    view: &TextureView,
+    color: Color,
+) -> RenderPass<'b> {
+    encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+        label: Some("Render Pass"),
+        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+            view,
+            resolve_target: None,
+            ops: wgpu::Operations {
+                load: wgpu::LoadOp::Clear(color),
+                store: wgpu::StoreOp::Store,
+            },
+        })],
+        depth_stencil_attachment: None,
+        occlusion_query_set: None,
+        timestamp_writes: None,
+    })
+}
+
+// Here we can add the WASM specific code
+pub fn create_gpu_instance() -> Instance {
+    Instance::new(wgpu::InstanceDescriptor {
+        backends: wgpu::Backends::PRIMARY,
+        ..Default::default()
+    })
 }

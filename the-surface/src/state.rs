@@ -1,6 +1,8 @@
-use common::state_builder::{create_adapter, create_device, create_surface_config};
+use common::state_builder::{
+    create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
+};
 use std::sync::Arc;
-use wgpu::{Device, Instance, Queue, Surface};
+use wgpu::{Color, Device, Queue, Surface};
 use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
 use winit::window::Window;
@@ -20,7 +22,7 @@ impl<'a> State<'a> {
         let window_arc = Arc::new(window);
         let size = window_arc.inner_size();
         // Instance is used to create surfaces and adapters
-        let instance = Self::create_gpu_instance();
+        let instance = create_gpu_instance();
 
         // The surface is the "window" that we will render the
         // graphics to
@@ -52,14 +54,6 @@ impl<'a> State<'a> {
         }
     }
 
-    // Here we can add the WASM specific code
-    fn create_gpu_instance() -> Instance {
-        Instance::new(wgpu::InstanceDescriptor {
-            backends: wgpu::Backends::PRIMARY,
-            ..Default::default()
-        })
-    }
-
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
         self.size = new_size;
 
@@ -88,25 +82,16 @@ impl<'a> State<'a> {
 
         {
             // println!("Blue: {}", self.blue);
-            let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("Render Pass"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: self.blue,
-                            a: 1.0,
-                        }),
-                        store: wgpu::StoreOp::Store,
-                    },
-                })],
-                depth_stencil_attachment: None,
-                occlusion_query_set: None,
-                timestamp_writes: None,
-            });
+            let _render_pass = create_render_pass(
+                &mut encoder,
+                &view,
+                Color {
+                    r: 0.1,
+                    g: 0.2,
+                    b: self.blue,
+                    a: 1.0,
+                },
+            );
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
