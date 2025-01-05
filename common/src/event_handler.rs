@@ -13,27 +13,44 @@ pub struct EventCommand {
 }
 
 impl EventCommand {
-    pub fn new(escape_event:Option<WindowEvent>) -> Self {
+    pub fn new(event_chain: Vec<WindowEvent>, escape_event: Option<WindowEvent>) -> Self {
         EventCommand {
-            event_chain: vec![],
-            escape_event
+            event_chain,
+            escape_event,
         }
     }
-    pub fn add_event(&mut self, event: WindowEvent) -> Option<bool> {
-        match &self.escape_event { 
-            Some(escape_event) => {
-                if event == *escape_event {
-                    Some(true)
-                } else {
-                    self.event_chain.push(event);
-                    None
-                }
-            }
-            None => {
-                self.event_chain.push(event);
-                None
-            }
+
+    pub fn compare(&self, read_commands: &Vec<WindowEvent>, current_command: WindowEvent) -> bool {
+        if self.event_chain.len() != read_commands.len() { 
+            return false;
         }
+        let equal_chain = self
+            .event_chain
+            .iter()
+            .zip(read_commands.iter())
+            .all(|(command_1, command_2)| compare_events(command_1, command_2));
+        match &self.escape_event { 
+            Some(escape_event) => equal_chain && compare_events(escape_event, &current_command),
+            None => equal_chain,
+        }
+    }
+}
+
+fn compare_events(command_1: &WindowEvent, command_2: &WindowEvent) -> bool {
+    match command_1 {
+        WindowEvent::MouseInput {
+            button: button_1,
+            state: state_1,
+            ..
+        } => match command_2 {
+            WindowEvent::MouseInput {
+                button: button_2,
+                state: state_2,
+                ..
+            } => button_1 == button_2 && state_1 == state_2,
+            _ => false,
+        },
+        _ => false,
     }
     
 }
@@ -70,14 +87,31 @@ mod tests {
         handler.clear();
         assert!(handler.get_current_event().is_none());
     }
-    
+
     #[test]
-    fn test_command_add_event() {
-        let mut command = EventCommand::new(Some(WindowEvent::CloseRequested));
-        let result = command.add_event(WindowEvent::CloseRequested);
-        assert_eq!(result, Some(true));
-        let result = command.add_event(WindowEvent::Resized(Default::default()));
-        assert!(result.is_none());
-        assert_eq!(command.event_chain.len(), 1);
+    fn test_click_command() {
+        let command = EventCommand::new(
+            vec![WindowEvent::MouseInput {
+                button: MouseButton::Left,
+                state: ElementState::Pressed,
+                device_id: DeviceId::dummy()
+            }],
+            Some(WindowEvent::MouseInput {
+                button: MouseButton::Left,
+                state: ElementState::Released,
+                device_id: DeviceId::dummy()
+            }),
+        );
+        let read_commands = vec![WindowEvent::MouseInput {
+            button: MouseButton::Left,
+            state: ElementState::Pressed,
+            device_id: DeviceId::dummy()
+        }];
+        let current_command = WindowEvent::MouseInput {
+            button: MouseButton::Left,
+            state: ElementState::Released,
+            device_id: DeviceId::dummy()
+        };
+        assert!(command.compare(&read_commands, current_command));
     }
 }
