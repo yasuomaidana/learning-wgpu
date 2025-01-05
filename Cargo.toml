@@ -8,6 +8,7 @@ env_logger = "0.11.5"
 wgpu = "23.0.1"
 winit = "0.30.5"
 pollster = "0.4.0"
+common = { path = "common" }
 
 [workspace.dependencies]
 env_logger = "0.11.5"
@@ -16,7 +17,7 @@ winit = "0.30.5"
 pollster = "0.4.0"
 
 [workspace]
-members = [ "the-pipeline","the-surface"]
+members = [ "common", "the-pipeline","the-surface"]
 
 [[bin]]
 name = "the-surface"

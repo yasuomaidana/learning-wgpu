@@ -1,6 +1,6 @@
-use pollster::FutureExt;
+use common::state_builder::{create_adapter, create_device, create_surface_config};
 use std::sync::Arc;
-use wgpu::{Adapter, Device, Instance, PresentMode, Queue, Surface, SurfaceCapabilities};
+use wgpu::{Device, Instance, Queue, Surface};
 use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
 use winit::window::Window;
@@ -30,15 +30,15 @@ impl<'a> State<'a> {
             .expect("Failed to create surface");
 
         // Adapter is a handle for our actual graphics card
-        let adapter = Self::create_adapter(instance, &surface);
+        let adapter = create_adapter(instance, &surface);
 
         // Device is the handle to the GPU. Responsible for the creation of most rendering and compute resources.
         // Queue is the handle to the command queue. Responsible for submitting commands to the GPU.
-        let (device, queue) = Self::create_device(&adapter);
+        let (device, queue) = create_device(&adapter);
 
         // SurfaceCapabilities are the capabilities of the surface
         let surface_caps = surface.get_capabilities(&adapter);
-        let config = Self::create_surface_config(size, surface_caps);
+        let config = create_surface_config(size, surface_caps);
         surface.configure(&device, &config);
 
         Self {
@@ -50,57 +50,6 @@ impl<'a> State<'a> {
             blue: 0.0,
             window: window_arc,
         }
-    }
-
-    fn create_surface_config(
-        size: PhysicalSize<u32>,
-        capabilities: SurfaceCapabilities,
-    ) -> wgpu::SurfaceConfiguration {
-        let surface_format = capabilities
-            .formats
-            .iter()
-            .find(|f| f.is_srgb())
-            .copied()
-            .unwrap_or(capabilities.formats[0]);
-
-        wgpu::SurfaceConfiguration {
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface_format,
-            width: size.width,
-            height: size.height,
-            present_mode: PresentMode::AutoNoVsync,
-            alpha_mode: capabilities.alpha_modes[0],
-            view_formats: vec![],
-            desired_maximum_frame_latency: 2,
-        }
-    }
-
-    fn create_device(adapter: &Adapter) -> (Device, Queue) {
-        adapter
-            .request_device(
-                &wgpu::DeviceDescriptor {
-                    required_features: wgpu::Features::empty(),
-                    required_limits: wgpu::Limits::default(),
-                    label: None,
-                    memory_hints: Default::default(),
-                },
-                None,
-            )
-            .block_on()
-            .unwrap()
-    }
-
-    fn create_adapter(instance: Instance, surface: &Surface) -> Adapter {
-        instance
-            .request_adapter(&wgpu::RequestAdapterOptions {
-                power_preference: wgpu::PowerPreference::HighPerformance,
-                // power_preference: wgpu::PowerPreference::default(),
-                compatible_surface: Some(&surface),
-                force_fallback_adapter: false,
-            })
-            // Look for wasm compatible adapter we shouldn't use block_on
-            .block_on()
-            .unwrap()
     }
 
     // Here we can add the WASM specific code
