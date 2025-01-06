@@ -22,19 +22,22 @@ impl EventCommand {
     ) -> Option<bool> {
         let mut equal_chain = None;
 
-        for (i, chain_event) in self.event_chain.iter().enumerate() {
-            if i >= read_commands.len() {
-                break;
+        if read_commands.len() < self.event_chain.len() {
+            if read_commands
+                .iter()
+                .zip(self.event_chain.iter())
+                .all(|(a, b)| comparator(a, b))
+            {
+                equal_chain = Some(false);
+                return equal_chain;
             }
-            if comparator(chain_event, &read_commands[i]) {
+        } else if read_commands.len() == self.event_chain.len() {
+            if read_commands
+                .iter()
+                .zip(self.event_chain.iter())
+                .all(|(a, b)| comparator(a, b))
+            {
                 equal_chain = Some(true);
-            } else {
-                if equal_chain == Some(true) {
-                    equal_chain = Some(false);
-                } else {
-                    equal_chain = None;
-                }
-                break;
             }
         }
 
@@ -42,11 +45,8 @@ impl EventCommand {
             None => None,
             Some(false) => Some(false),
             Some(true) => match &self.escape_event {
-                None => Some(self.event_chain.len() == read_commands.len()),
-                Some(escape_event) => Some(
-                    comparator(escape_event, current_command)
-                        && self.event_chain.len() == read_commands.len(),
-                ),
+                None => Some(true),
+                Some(escape_event) => Some(comparator(escape_event, current_command)),
             },
         }
     }
@@ -126,6 +126,28 @@ mod tests {
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
         let result = command.compare(&read_commands, &current_command, compare_events);
         assert!(!result.unwrap());
+    }
+
+    #[test]
+    fn test_different_command_comparison() {
+        let command = EventCommand::new(
+            vec![
+                mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+                mouse_button_event_generator(MouseButton::Right, ElementState::Pressed),
+            ],
+            Some(mouse_button_event_generator(
+                MouseButton::Left,
+                ElementState::Released,
+            )),
+        );
+        let read_commands = vec![
+            mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+            mouse_button_event_generator(MouseButton::Middle, ElementState::Pressed),
+        ];
+        let current_command =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Released);
+        let result = command.compare(&read_commands, &current_command, compare_events);
+        assert!(result.is_none());
     }
 
     #[test]
