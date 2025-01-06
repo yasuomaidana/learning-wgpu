@@ -1,4 +1,4 @@
-use winit::event::WindowEvent;
+use winit::event::{ElementState, MouseButton, WindowEvent};
 
 #[derive(Clone, Debug)]
 pub struct EventCommand {
@@ -18,20 +18,35 @@ impl EventCommand {
         &self,
         read_commands: &Vec<WindowEvent>,
         current_command: &WindowEvent,
-        comparator: fn(&WindowEvent, &WindowEvent) -> Option<bool>,
+        comparator: fn(&WindowEvent, &WindowEvent) -> bool,
     ) -> Option<bool> {
-        let equal_chain = self
-            .event_chain
-            .iter()
-            .zip(read_commands.iter())
-            .find_map(|(command, read_command)| comparator(command, read_command));
-        
+        let mut equal_chain = None;
+
+        for (i, chain_event) in self.event_chain.iter().enumerate() {
+            if i >= read_commands.len() {
+                break;
+            }
+            if comparator(chain_event, &read_commands[i]) {
+                equal_chain = Some(true);
+            } else {
+                if equal_chain == Some(true) {
+                    equal_chain = Some(false);
+                } else {
+                    equal_chain = None;
+                }
+                break;
+            }
+        }
+
         match equal_chain {
             None => None,
             Some(false) => Some(false),
             Some(true) => match &self.escape_event {
-                None => Some(true),
-                Some(escape_event) => comparator(&escape_event, current_command),
+                None => Some(self.event_chain.len() == read_commands.len()),
+                Some(escape_event) => Some(
+                    comparator(escape_event, current_command)
+                        && self.event_chain.len() == read_commands.len(),
+                ),
             },
         }
     }
@@ -51,7 +66,7 @@ mod tests {
     use crate::event_handler::event_command::{mouse_button_event_generator, EventCommand};
     use winit::event::{ElementState, MouseButton, WindowEvent};
 
-    fn compare_events(command_1: &WindowEvent, command_2: &WindowEvent) -> Option<bool> {
+    fn compare_events(command_1: &WindowEvent, command_2: &WindowEvent) -> bool {
         match command_1 {
             WindowEvent::MouseInput {
                 button: button_1,
@@ -62,10 +77,10 @@ mod tests {
                     button: button_2,
                     state: state_2,
                     ..
-                } => Some(button_1 == button_2 && state_1 == state_2),
-                _ => None,
+                } => button_1 == button_2 && state_1 == state_2,
+                _ => false,
             },
-            _ => None,
+            _ => false,
         }
     }
 
@@ -89,5 +104,49 @@ mod tests {
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
         let result = command.compare(&read_commands, &current_command, compare_events);
         assert!(result.unwrap());
+    }
+
+    #[test]
+    fn test_incomplete_command_comparison() {
+        let command = EventCommand::new(
+            vec![
+                mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+                mouse_button_event_generator(MouseButton::Right, ElementState::Pressed),
+            ],
+            Some(mouse_button_event_generator(
+                MouseButton::Left,
+                ElementState::Released,
+            )),
+        );
+        let read_commands = vec![mouse_button_event_generator(
+            MouseButton::Left,
+            ElementState::Pressed,
+        )];
+        let current_command =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Released);
+        let result = command.compare(&read_commands, &current_command, compare_events);
+        assert!(!result.unwrap());
+    }
+
+    #[test]
+    fn test_non_related_command() {
+        let command = EventCommand::new(
+            vec![
+                mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+                mouse_button_event_generator(MouseButton::Right, ElementState::Pressed),
+            ],
+            Some(mouse_button_event_generator(
+                MouseButton::Left,
+                ElementState::Released,
+            )),
+        );
+        let read_commands = vec![mouse_button_event_generator(
+            MouseButton::Middle,
+            ElementState::Pressed,
+        )];
+        let current_command =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Released);
+        let result = command.compare(&read_commands, &current_command, compare_events);
+        assert!(result.is_none());
     }
 }
