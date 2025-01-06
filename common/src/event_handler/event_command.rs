@@ -60,29 +60,31 @@ fn mouse_button_event_generator(button: MouseButton, state: ElementState) -> Win
     }
 }
 
+pub fn default_compare_events(command_1: &WindowEvent, command_2: &WindowEvent) -> bool {
+    match command_1 {
+        WindowEvent::MouseInput {
+            button: button_1,
+            state: state_1,
+            ..
+        } => match command_2 {
+            WindowEvent::MouseInput {
+                button: button_2,
+                state: state_2,
+                ..
+            } => button_1 == button_2 && state_1 == state_2,
+            _ => false,
+        },
+        _ => false,
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
-    use crate::event_handler::event_command::{mouse_button_event_generator, EventCommand};
+    use crate::event_handler::event_command::{default_compare_events, mouse_button_event_generator, EventCommand};
     use winit::event::{ElementState, MouseButton, WindowEvent};
 
-    fn compare_events(command_1: &WindowEvent, command_2: &WindowEvent) -> bool {
-        match command_1 {
-            WindowEvent::MouseInput {
-                button: button_1,
-                state: state_1,
-                ..
-            } => match command_2 {
-                WindowEvent::MouseInput {
-                    button: button_2,
-                    state: state_2,
-                    ..
-                } => button_1 == button_2 && state_1 == state_2,
-                _ => false,
-            },
-            _ => false,
-        }
-    }
+    
 
     #[test]
     fn test_click_command() {
@@ -102,7 +104,7 @@ mod tests {
         )];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, compare_events);
+        let result = command.compare(&read_commands, &current_command, default_compare_events);
         assert!(result.unwrap());
     }
 
@@ -124,7 +126,7 @@ mod tests {
         )];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, compare_events);
+        let result = command.compare(&read_commands, &current_command, default_compare_events);
         assert!(!result.unwrap());
     }
 
@@ -146,7 +148,7 @@ mod tests {
         ];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, compare_events);
+        let result = command.compare(&read_commands, &current_command, default_compare_events);
         assert!(result.is_none());
     }
 
@@ -168,7 +170,7 @@ mod tests {
         )];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, compare_events);
+        let result = command.compare(&read_commands, &current_command, default_compare_events);
         assert!(result.is_none());
     }
 }
