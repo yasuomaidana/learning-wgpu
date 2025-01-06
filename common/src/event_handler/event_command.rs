@@ -37,11 +37,19 @@ impl EventCommand {
     }
 }
 
+fn mouse_button_event_generator(button: MouseButton, state: ElementState) -> WindowEvent {
+    WindowEvent::MouseInput {
+        button,
+        state,
+        device_id: winit::event::DeviceId::dummy(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
-    use crate::event_handler::event_command::EventCommand;
-    use winit::event::{DeviceId, ElementState, MouseButton, WindowEvent};
+    use crate::event_handler::event_command::{mouse_button_event_generator, EventCommand};
+    use winit::event::{ElementState, MouseButton, WindowEvent};
 
     fn compare_events(command_1: &WindowEvent, command_2: &WindowEvent) -> Option<bool> {
         match command_1 {
@@ -64,27 +72,21 @@ mod tests {
     #[test]
     fn test_click_command() {
         let command = EventCommand::new(
-            vec![WindowEvent::MouseInput {
-                button: MouseButton::Left,
-                state: ElementState::Pressed,
-                device_id: DeviceId::dummy(),
-            }],
-            Some(WindowEvent::MouseInput {
-                button: MouseButton::Left,
-                state: ElementState::Released,
-                device_id: DeviceId::dummy(),
-            }),
+            vec![mouse_button_event_generator(
+                MouseButton::Left,
+                ElementState::Pressed,
+            )],
+            Some(mouse_button_event_generator(
+                MouseButton::Left,
+                ElementState::Released,
+            )),
         );
-        let read_commands = vec![WindowEvent::MouseInput {
-            button: MouseButton::Left,
-            state: ElementState::Pressed,
-            device_id: DeviceId::dummy(),
-        }];
-        let current_command = WindowEvent::MouseInput {
-            button: MouseButton::Left,
-            state: ElementState::Released,
-            device_id: DeviceId::dummy(),
-        };
+        let read_commands = vec![mouse_button_event_generator(
+            MouseButton::Left,
+            ElementState::Pressed,
+        )];
+        let current_command =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Released);
         let result = command.compare(&read_commands, &current_command, compare_events);
         assert!(result.unwrap());
     }
