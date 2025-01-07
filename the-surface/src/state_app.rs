@@ -20,7 +20,7 @@ impl<'a> StateApplication<'a> {
         
         StateApplication {
             state: None,
-            event_handler: EventHandler::new(),
+            event_handler: EventHandler::new(vec![left_button_pressed], None),
         }
     }
 }
@@ -28,7 +28,7 @@ impl<'a> StateApplication<'a> {
 impl ApplicationHandler for StateApplication<'_> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = event_loop
-            .create_window(Window::default_attributes().with_title("Hello, World!"))
+            .create_window(Window::default_attributes().with_title("The surface"))
             .expect("Failed to create window");
         self.state = Some(State::new(window));
     }
