@@ -91,7 +91,10 @@ impl EventHandler {
 
 #[cfg(test)]
 mod test {
-    use crate::event_handler::event_command::{mouse_button_event_generator, pressure_event_generator, EventCommand};
+    use crate::event_handler::event_command::{
+        default_compare_events, mouse_button_event_generator, pressure_event_generator,
+        EventCommand,
+    };
     use crate::event_handler::event_handler::EventHandler;
     use winit::event::{ElementState, MouseButton, WindowEvent};
 
@@ -130,7 +133,7 @@ mod test {
         let last_command = event_handler.get_current_command();
         assert!(last_command.is_some());
         let last_command = last_command.unwrap();
-        let last_event= last_command.get_last_event().unwrap();
+        let last_event = last_command.get_last_event().unwrap();
         let pressure = match last_event {
             WindowEvent::TouchpadPressure { pressure, .. } => pressure,
             _ => &0.0,
@@ -165,5 +168,97 @@ mod test {
         let button_event = mouse_button_event_generator(MouseButton::Left, ElementState::Released);
         let pressing_left_button = event_handler.input(button_event);
         assert!(pressing_left_button.is_none());
+    }
+
+    enum Command {
+        LeftPressure(EventCommand),
+        RightPressure(EventCommand),
+    }
+
+    #[test]
+    fn test_get_enum_command() {
+        let commands = vec![
+            Command::LeftPressure(EventCommand::new(
+                vec![
+                    mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+                    pressure_event_generator(),
+                ],
+                Some(mouse_button_event_generator(
+                    MouseButton::Left,
+                    ElementState::Released,
+                )),
+            )),
+            Command::RightPressure(EventCommand::new(
+                vec![
+                    mouse_button_event_generator(MouseButton::Right, ElementState::Pressed),
+                    pressure_event_generator(),
+                ],
+                Some(mouse_button_event_generator(
+                    MouseButton::Right,
+                    ElementState::Released,
+                )),
+            )),
+        ];
+
+        let mut event_handler = EventHandler::new(
+            commands
+                .iter()
+                .map(|command| match command {
+                    Command::LeftPressure(event_command) => event_command.clone(),
+                    Command::RightPressure(event_command) => event_command.clone(),
+                })
+                .collect(),
+            None,
+        );
+        let pressing_left_button =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Pressed);
+        let pressing_left_button = event_handler.input(pressing_left_button);
+        assert!(pressing_left_button.is_some());
+        let pressure_event = WindowEvent::TouchpadPressure {
+            device_id: winit::event::DeviceId::dummy(),
+            pressure: 2.0,
+            stage: 0,
+        };
+        let pressure_event = event_handler.input(pressure_event);
+        assert!(pressure_event.is_some());
+        assert!(!pressure_event.unwrap());
+        let button_event = mouse_button_event_generator(MouseButton::Left, ElementState::Released);
+        let pressing_left_button = event_handler.input(button_event);
+        assert!(pressing_left_button.is_some());
+        assert!(pressing_left_button.unwrap());
+        let last_command = event_handler.get_current_command();
+        assert!(last_command.is_some());
+        let last_command = last_command.unwrap();
+
+        let last_command_enum = commands
+            .iter()
+            .find_map(|command| match command {
+                Command::LeftPressure(event_command)
+                    if event_command.equal(&last_command, default_compare_events) =>
+                {
+                    Some(Command::LeftPressure(event_command.clone()))
+                }
+                Command::RightPressure(event_command)
+                    if event_command.equal(&last_command, default_compare_events) =>
+                {
+                    Some(Command::RightPressure(event_command.clone()))
+                }
+                _ => None,
+            })
+            .unwrap();
+
+        assert!(matches!(last_command_enum, Command::LeftPressure(_)));
+        let last_event = last_command.get_last_event().unwrap();
+        match last_command_enum {
+            Command::LeftPressure(command) => {
+                let pressure = match last_event {
+                    WindowEvent::TouchpadPressure { pressure, .. } => pressure,
+                    _ => &0.0,
+                };
+                assert_eq!(pressure, &2.0);
+            }
+            Command::RightPressure(command) => {}
+        }
+        
     }
 }
