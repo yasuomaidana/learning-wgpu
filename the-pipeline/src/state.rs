@@ -4,6 +4,7 @@ use wgpu::{Color, Device, PipelineCompilationOptions, Queue, RenderPipeline, Sur
 use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
 use winit::window::Window;
+use common::event_handler::pressure_event_handler::handle_pressure_event;
 
 pub struct State<'a> {
     surface: Surface<'a>,
@@ -178,7 +179,7 @@ impl<'a> State<'a> {
     pub(crate) fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
             WindowEvent::TouchpadPressure { pressure, .. } => {
-                self.blue = *pressure as f64;
+                self.blue = handle_pressure_event(*pressure, self.blue);
                 return true;
             }
             _ => {}
