@@ -179,7 +179,6 @@ impl<'a> State<'a> {
         match event {
             WindowEvent::TouchpadPressure { pressure, .. } => {
                 self.blue = *pressure as f64;
-                println!("Pressure: {}", pressure);
                 return true;
             }
             _ => {}
