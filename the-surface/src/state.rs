@@ -116,11 +116,16 @@ impl<'a> State<'a> {
     /// # Returns
     ///
     /// * `bool` - `true` if the event has been fully processed, `false` otherwise.
-    pub(crate) fn input(&mut self, event: &WindowEvent) -> bool {
-        match event {
+    pub(crate) fn input(&mut self, event: &EventCommand) -> bool {
+        match event.get_last_event().unwrap() {
             WindowEvent::TouchpadPressure { pressure, .. } => {
-                self.blue = *pressure as f64;
-                println!("Pressure: {}", pressure);
+                if *pressure == 0.0 && (self.blue - *pressure as f64) > 0.2 {
+                    self.blue -= 0.1;
+                    self.blue = self.blue.max(0.0);
+                } else {
+                    self.blue = *pressure as f64;
+                }
+                println!("Blue: {:.4} Pressure: {:.4}", self.blue, pressure);
                 return true;
             }
             _ => {}
