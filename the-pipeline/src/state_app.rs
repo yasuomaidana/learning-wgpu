@@ -47,11 +47,10 @@ impl<'a> StateApplication<'a> {
             state: None,
             event_handler: EventHandler::new(
                 vec![EventCommand::new(
-                    vec![mouse_button_event_generator(
-                        MouseButton::Left,
-                        ElementState::Pressed,
-                    ),
-                    pressure_event_generator()],
+                    vec![
+                        mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+                        pressure_event_generator(),
+                    ],
                     Some(mouse_button_event_generator(
                         MouseButton::Left,
                         ElementState::Released,
@@ -94,9 +93,9 @@ impl ApplicationHandler for StateApplication<'_> {
                 _ => {}
             }
         }
-        
+
         let current_stored = get_pipeline_command(self.event_handler.get_partial_command());
-        
+
         if let Some(current) = current_stored {
             match current {
                 PipelineCommands::LeftClickCommand(event_command) => {
