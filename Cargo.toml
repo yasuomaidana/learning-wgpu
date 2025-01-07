@@ -9,6 +9,7 @@ wgpu = "23.0.1"
 winit = "0.30.5"
 pollster = "0.4.0"
 rayon = "1.10.0"
+common = { path = "common" }
 
 [workspace]
 members = [ "common", "initial-tutorial", "the-pipeline","the-surface"]

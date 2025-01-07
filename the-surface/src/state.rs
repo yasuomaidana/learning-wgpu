@@ -1,3 +1,4 @@
+use common::event_handler::event_command::EventCommand;
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
