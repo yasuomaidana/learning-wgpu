@@ -13,12 +13,23 @@ impl EventCommand {
             escape_event,
         }
     }
-    
+
+    pub fn equal(
+        &self,
+        other: &EventCommand,
+        comparator: fn(&WindowEvent, &WindowEvent) -> bool,
+    ) -> bool {
+        let other_commands = &other.event_chain;
+        let other_escape = other.escape_event.as_ref();
+        self.compare(other_commands, other_escape, comparator)
+            .unwrap_or(false)
+    }
+
     pub fn set_last_event(&mut self, last_event: WindowEvent) {
         let last_index = &self.event_chain.len() - 1;
         self.event_chain[last_index] = last_event;
     }
-    
+
     pub fn get_last_event(&self) -> Option<&WindowEvent> {
         self.event_chain.last()
     }
