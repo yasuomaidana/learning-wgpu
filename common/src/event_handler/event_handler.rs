@@ -8,7 +8,7 @@ pub struct EventHandler {
     compare_events: fn(&WindowEvent, &WindowEvent) -> bool,
     accumulated_events: Vec<WindowEvent>,
     current_command: Option<EventCommand>,
-    last_event: Option<WindowEvent>
+    last_event: Option<WindowEvent>,
 }
 
 impl EventHandler {
@@ -28,7 +28,7 @@ impl EventHandler {
         self.accumulated_events.clear();
         self.current_command = None;
     }
-    
+
     pub fn get_current_command(&self) -> Option<EventCommand> {
         self.current_command.clone()
     }
@@ -57,11 +57,15 @@ impl EventHandler {
         } else {
             let finished = likely_commands.iter().any(|&x| x);
             if finished {
-                let mut event_command = self.supported_commands
+                let mut event_command = self
+                    .supported_commands
                     .par_iter()
                     .find_any(|command| {
-                        command.compare(&self.accumulated_events, Some(&event), self.compare_events) == Some(true)
-                    }).unwrap().clone();
+                        command.compare(&self.accumulated_events, Some(&event), self.compare_events)
+                            == Some(true)
+                    })
+                    .unwrap()
+                    .clone();
                 event_command.set_last_event(self.last_event.clone()?);
                 self.current_command = Some(event_command);
                 Some(true)
