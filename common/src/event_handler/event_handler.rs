@@ -81,7 +81,8 @@ impl EventHandler {
 
     pub fn input(&mut self, event: WindowEvent) -> Option<bool> {
         let likely_commands = self.likely_commands(Some(&event));
-        if likely_commands.is_empty() {
+        let partial_command = self.get_partial_command();
+        if likely_commands.is_empty() && partial_command.is_none() {
             self.accumulated_events.push(event);
             if self.likely_commands(None).is_empty() {
                 self.accumulated_events.clear();
