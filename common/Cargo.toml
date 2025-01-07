@@ -7,3 +7,4 @@ edition = "2021"
 wgpu = {workspace = true}
 winit = {workspace = true}
 pollster = {workspace = true}
+rayon = {workspace = true}

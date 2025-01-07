@@ -3,18 +3,12 @@ name = "learning-wpu"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-env_logger = "0.11.5"
-wgpu = "23.0.1"
-winit = "0.30.5"
-pollster = "0.4.0"
-common = { path = "common" }
-
 [workspace.dependencies]
 env_logger = "0.11.5"
 wgpu = "23.0.1"
 winit = "0.30.5"
 pollster = "0.4.0"
+rayon = "1.10.0"
 
 [workspace]
-members = [ "common", "the-pipeline","the-surface"]
+members = [ "common", "initial-tutorial", "the-pipeline","the-surface"]

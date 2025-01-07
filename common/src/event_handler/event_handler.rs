@@ -259,6 +259,5 @@ mod test {
             }
             Command::RightPressure(command) => {}
         }
-        
     }
 }
