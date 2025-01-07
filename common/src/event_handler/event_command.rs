@@ -25,6 +25,25 @@ impl EventCommand {
             .unwrap_or(false)
     }
 
+    pub fn partial_equal(
+        &self,
+        commands: &Vec<WindowEvent>,
+        escape_event: &Option<WindowEvent>,
+        comparator: fn(&WindowEvent, &WindowEvent) -> bool,
+    ) -> bool {
+        match escape_event {
+            None => match self.event_chain.len() == commands.len() {
+                true => self
+                    .event_chain
+                    .iter()
+                    .zip(commands.iter())
+                    .all(|(a, b)| comparator(a, b)),
+                false => false,
+            },
+            Some(_) => false,
+        }
+    }
+
     pub fn set_last_event(&mut self, last_event: WindowEvent) {
         let last_index = &self.event_chain.len() - 1;
         self.event_chain[last_index] = last_event;

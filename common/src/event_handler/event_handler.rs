@@ -28,6 +28,43 @@ impl EventHandler {
         self.accumulated_events.clear();
         self.current_command = None;
     }
+    
+    pub fn get_partial_command(&self) -> Option<EventCommand> {
+        let last_event = match &self.last_event { 
+            Some(event) =>{ 
+                match self.accumulated_events.last() {
+                    None => {None}
+                    Some(last_event) => {
+                        if !(self.compare_events)(last_event, event) {
+                            Some(event.clone())
+                        } else {
+                            None
+                        }
+                    }
+                }
+            },
+            None => return None
+        };
+        
+        let base_command = self.supported_commands
+            .par_iter()
+            .find_any(|command| {
+                command.partial_equal(
+                    &self.accumulated_events,
+                    &last_event,
+                    self.compare_events,
+                )
+            })
+            .cloned();
+        match base_command { 
+            Some(mut command) => {
+                command.set_last_event(self.last_event.clone()?);
+                Some(command)
+            }
+            None => None
+        }
+        
+    }
 
     pub fn get_current_command(&self) -> Option<EventCommand> {
         self.current_command.clone()
@@ -212,8 +249,16 @@ mod test {
         );
         let pressing_left_button =
             mouse_button_event_generator(MouseButton::Left, ElementState::Pressed);
+        
+        let partial_command = event_handler.get_partial_command();
+        assert!(partial_command.is_none());
+        
         let pressing_left_button = event_handler.input(pressing_left_button);
         assert!(pressing_left_button.is_some());
+        
+        let partial_command = event_handler.get_partial_command();
+        assert!(partial_command.is_none());
+        
         let pressure_event = WindowEvent::TouchpadPressure {
             device_id: winit::event::DeviceId::dummy(),
             pressure: 2.0,
@@ -222,6 +267,15 @@ mod test {
         let pressure_event = event_handler.input(pressure_event);
         assert!(pressure_event.is_some());
         assert!(!pressure_event.unwrap());
+
+        let partial_command = event_handler.get_partial_command();
+        assert!(partial_command.is_some());
+
+        let partial_command = partial_command.unwrap();
+        let last_event = partial_command.get_last_event().unwrap();
+        assert!(matches!(last_event, WindowEvent::TouchpadPressure { pressure, .. } if pressure == &2.0));
+        
+        
         let button_event = mouse_button_event_generator(MouseButton::Left, ElementState::Released);
         let pressing_left_button = event_handler.input(button_event);
         assert!(pressing_left_button.is_some());
@@ -236,28 +290,28 @@ mod test {
                 Command::LeftPressure(event_command)
                     if event_command.equal(&last_command, default_compare_events) =>
                 {
-                    Some(Command::LeftPressure(event_command.clone()))
+                    Some(Command::LeftPressure(last_command.clone()))
                 }
                 Command::RightPressure(event_command)
                     if event_command.equal(&last_command, default_compare_events) =>
                 {
-                    Some(Command::RightPressure(event_command.clone()))
+                    Some(Command::RightPressure(last_command.clone()))
                 }
                 _ => None,
             })
             .unwrap();
 
         assert!(matches!(last_command_enum, Command::LeftPressure(_)));
-        let last_event = last_command.get_last_event().unwrap();
+        
         match last_command_enum {
             Command::LeftPressure(command) => {
-                let pressure = match last_event {
+                let pressure = match command.get_last_event().unwrap() {
                     WindowEvent::TouchpadPressure { pressure, .. } => pressure,
                     _ => &0.0,
                 };
                 assert_eq!(pressure, &2.0);
             }
-            Command::RightPressure(command) => {}
+            Command::RightPressure(_command) => {}
         }
     }
 }
