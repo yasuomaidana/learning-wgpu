@@ -1,5 +1,6 @@
 use crate::state_app::StateApplication;
 
+mod event_handler;
 mod state;
 mod state_app;
 

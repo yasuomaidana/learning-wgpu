@@ -1,10 +1,11 @@
 [package]
-name = "the-surface"
+name = "the-pipeline"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+env_logger = {workspace = true}
 wgpu = {workspace = true}
 winit = {workspace = true}
 pollster = {workspace = true}
-common = { workspace = true }
+common = { path = "../common" }

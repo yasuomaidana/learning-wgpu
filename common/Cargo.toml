@@ -1,5 +1,5 @@
 [package]
-name = "the-surface"
+name = "common"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,4 +7,4 @@ edition = "2021"
 wgpu = {workspace = true}
 winit = {workspace = true}
 pollster = {workspace = true}
-common = { workspace = true }
+rayon = {workspace = true}

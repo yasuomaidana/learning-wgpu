@@ -1,10 +1,9 @@
 use crate::state::State;
-use common::event_handler::event_command::{mouse_button_event_generator, pressure_event_generator, EventCommand};
-use common::event_handler::event_handler::EventHandler;
 use winit::application::ApplicationHandler;
-use winit::event::{ElementState, MouseButton, WindowEvent};
+use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
+use crate::event_handler::event_handler::EventHandler;
 
 pub struct StateApplication<'a> {
     state: Option<State<'a>>,
@@ -13,14 +12,9 @@ pub struct StateApplication<'a> {
 
 impl<'a> StateApplication<'a> {
     pub fn new() -> StateApplication<'a> {
-        let left_button_pressed = EventCommand::new(vec![
-            mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
-            pressure_event_generator()
-        ], Some(mouse_button_event_generator(MouseButton::Left, ElementState::Released)));
-        
         StateApplication {
             state: None,
-            event_handler: EventHandler::new(vec![left_button_pressed], None),
+            event_handler: EventHandler::new(),
         }
     }
 }
@@ -28,7 +22,7 @@ impl<'a> StateApplication<'a> {
 impl ApplicationHandler for StateApplication<'_> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = event_loop
-            .create_window(Window::default_attributes().with_title("The surface"))
+            .create_window(Window::default_attributes().with_title("Hello, World!"))
             .expect("Failed to create window");
         self.state = Some(State::new(window));
     }
@@ -42,7 +36,7 @@ impl ApplicationHandler for StateApplication<'_> {
         let read_input = self.event_handler.input(event.clone());
         let window = self.state.as_ref().unwrap().window();
 
-        if window.id() == window_id && read_input.is_none() {
+        if window.id() == window_id && !read_input {
             match event {
                 WindowEvent::CloseRequested => {
                     event_loop.exit();
@@ -56,21 +50,17 @@ impl ApplicationHandler for StateApplication<'_> {
                 _ => {}
             }
         }
-        
-        let current_stored = self.event_handler.get_partial_command();
+        let current_stored = self.event_handler.get_current_event();
 
         if let Some(current) = current_stored {
-            let redraw = self.state.as_mut().unwrap().input(&current);
+            let redraw = self.state.as_mut().unwrap().input(current);
             if redraw {
                 self.state.as_mut().unwrap().update();
             }
         }
-        
-        match read_input {
-            Some(true) => {
-                self.event_handler.clear();
-            }
-            _ => {}
+
+        if read_input {
+            self.event_handler.clear();
         }
     }
 }
