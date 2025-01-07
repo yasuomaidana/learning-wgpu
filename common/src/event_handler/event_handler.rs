@@ -199,6 +199,36 @@ mod test {
         let pressing_left_button = event_handler.input(button_event);
         assert!(pressing_left_button.is_none());
     }
+    
+    fn assert_updating_pressure(pressure:f32, event_handler: &mut EventHandler){
+        let pressure_event = WindowEvent::TouchpadPressure {
+            device_id: winit::event::DeviceId::dummy(),
+            pressure,
+            stage: 0,
+        };
+        let pressure_event = event_handler.input(pressure_event);
+        assert!(pressure_event.is_some());
+        let partial_command = event_handler.get_partial_command();
+        assert!(partial_command.is_some());
+        let partial_command = partial_command.unwrap();
+        let last_event = partial_command.get_last_event().unwrap();
+        assert!(matches!(last_event, WindowEvent::TouchpadPressure { pressure, .. } if pressure == pressure));
+        
+    }
+    
+    #[test]
+    fn test_updating_value(){
+        let mut event_handler = create_pressure_command_handler();
+        let pressing_left_button =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Pressed);
+        let pressing_left_button = event_handler.input(pressing_left_button);
+        assert!(pressing_left_button.is_some());
+        
+        assert_updating_pressure(2.0, &mut event_handler);
+        assert_updating_pressure(3.0, &mut event_handler);
+        
+        
+    }
 
     #[test]
     fn test_invalid_event_handler() {
