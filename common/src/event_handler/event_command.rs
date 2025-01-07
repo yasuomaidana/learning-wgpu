@@ -17,12 +17,12 @@ impl EventCommand {
     pub fn compare(
         &self,
         read_commands: &Vec<WindowEvent>,
-        current_command: &WindowEvent,
+        current_command: Option<&WindowEvent>,
         comparator: fn(&WindowEvent, &WindowEvent) -> bool,
     ) -> Option<bool> {
         let mut equal_chain = None;
 
-        if read_commands.len() < self.event_chain.len() {
+        if read_commands.len() > 0 && read_commands.len() < self.event_chain.len() {
             if read_commands
                 .iter()
                 .zip(self.event_chain.iter())
@@ -46,17 +46,31 @@ impl EventCommand {
             Some(false) => Some(false),
             Some(true) => match &self.escape_event {
                 None => Some(true),
-                Some(escape_event) => Some(comparator(escape_event, current_command)),
+                Some(escape_event) => match current_command {
+                    None => Some(false),
+                    Some(current_command) => match comparator(escape_event, current_command) {
+                        true => Some(true),
+                        false => None,
+                    },
+                },
             },
         }
     }
 }
 
-fn mouse_button_event_generator(button: MouseButton, state: ElementState) -> WindowEvent {
+pub fn mouse_button_event_generator(button: MouseButton, state: ElementState) -> WindowEvent {
     WindowEvent::MouseInput {
         button,
         state,
         device_id: winit::event::DeviceId::dummy(),
+    }
+}
+
+pub fn pressure_event_generator() -> WindowEvent {
+    WindowEvent::TouchpadPressure {
+        device_id: winit::event::DeviceId::dummy(),
+        pressure: 0.0,
+        stage: 0,
     }
 }
 
@@ -74,17 +88,20 @@ pub fn default_compare_events(command_1: &WindowEvent, command_2: &WindowEvent) 
             } => button_1 == button_2 && state_1 == state_2,
             _ => false,
         },
+        WindowEvent::TouchpadPressure { .. } => match command_2 {
+            WindowEvent::TouchpadPressure { .. } => true,
+            _ => false,
+        },
         _ => false,
     }
 }
 
 #[cfg(test)]
 mod tests {
-
-    use crate::event_handler::event_command::{default_compare_events, mouse_button_event_generator, EventCommand};
-    use winit::event::{ElementState, MouseButton, WindowEvent};
-
-    
+    use crate::event_handler::event_command::{
+        default_compare_events, mouse_button_event_generator, EventCommand,
+    };
+    use winit::event::{ElementState, MouseButton};
 
     #[test]
     fn test_click_command() {
@@ -104,7 +121,11 @@ mod tests {
         )];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, default_compare_events);
+        let result = command.compare(
+            &read_commands,
+            Some(&current_command),
+            default_compare_events,
+        );
         assert!(result.unwrap());
     }
 
@@ -126,7 +147,11 @@ mod tests {
         )];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, default_compare_events);
+        let result = command.compare(
+            &read_commands,
+            Some(&current_command),
+            default_compare_events,
+        );
         assert!(!result.unwrap());
     }
 
@@ -148,7 +173,11 @@ mod tests {
         ];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, default_compare_events);
+        let result = command.compare(
+            &read_commands,
+            Some(&current_command),
+            default_compare_events,
+        );
         assert!(result.is_none());
     }
 
@@ -170,7 +199,11 @@ mod tests {
         )];
         let current_command =
             mouse_button_event_generator(MouseButton::Left, ElementState::Released);
-        let result = command.compare(&read_commands, &current_command, default_compare_events);
+        let result = command.compare(
+            &read_commands,
+            Some(&current_command),
+            default_compare_events,
+        );
         assert!(result.is_none());
     }
 }

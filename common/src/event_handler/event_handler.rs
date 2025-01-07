@@ -3,17 +3,17 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use winit::event::WindowEvent;
 
 #[derive(Debug, Clone)]
-pub struct EventHandler<T> {
+pub struct EventHandler {
     supported_commands: Vec<EventCommand>,
-    compare_events: fn(&T, &T) -> bool,
+    compare_events: fn(&WindowEvent, &WindowEvent) -> bool,
     accumulated_events: Vec<WindowEvent>,
-    current_event: Option<T>,
+    current_event: Option<WindowEvent>,
 }
 
-impl<T: Clone> EventHandler<T> {
+impl EventHandler {
     pub fn new(
         supported_commands: Vec<EventCommand>,
-        compare_events: Option<fn(&T, &T) -> bool>,
+        compare_events: Option<fn(&WindowEvent, &WindowEvent) -> bool>,
     ) -> Self {
         EventHandler {
             supported_commands,
@@ -27,19 +27,122 @@ impl<T: Clone> EventHandler<T> {
         self.current_event = None;
     }
 
-    pub fn get_current_event(&self) -> Option<&T> {
+    pub fn get_current_event(&self) -> Option<&WindowEvent> {
         self.current_event.as_ref()
     }
 
-    pub fn input(&mut self, event: WindowEvent) -> Option<bool> {
-        let likely_commands =
-            self.supported_commands.par_iter().filter_map(|command| {
-                match command.compare(&self.accumulated_events, &event, self.compare_events) {
-                    Some(_) => Some(command),
-                    None => None,
-                }
-            });
+    fn likely_commands(&self, escape_event: Option<&WindowEvent>) -> Vec<bool> {
+        self.supported_commands
+            .par_iter()
+            .filter_map(|command| {
+                command.compare(&self.accumulated_events, escape_event, self.compare_events)
+            })
+            .collect::<Vec<bool>>()
+    }
 
-        None
+    pub fn input(&mut self, event: WindowEvent) -> Option<bool> {
+        let likely_commands = self.likely_commands(Some(&event));
+        if likely_commands.is_empty() {
+            self.accumulated_events.push(event);
+            if self.likely_commands(None).is_empty() {
+                self.accumulated_events.clear();
+                return None;
+            }
+            {
+                Some(false)
+            }
+        } else {
+            let finished = likely_commands.iter().any(|&x| x);
+            if finished {
+                Some(true)
+            } else {
+                let last_event = self.accumulated_events.last();
+
+                match last_event {
+                    Some(last_event) => {
+                        if !(self.compare_events)(last_event, &event) {
+                            self.accumulated_events.push(event.clone());
+                        }
+                    }
+                    None => {
+                        self.accumulated_events.push(event.clone());
+                    }
+                }
+                self.current_event = Some(event.clone());
+                Some(false)
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::event_handler::event_command::{
+        mouse_button_event_generator, pressure_event_generator, EventCommand,
+    };
+    use crate::event_handler::event_handler::EventHandler;
+    use winit::event::{ElementState, MouseButton, WindowEvent};
+
+    fn create_pressure_command_handler() -> EventHandler {
+        let command = EventCommand::new(
+            vec![
+                mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+                pressure_event_generator(),
+            ],
+            Some(mouse_button_event_generator(
+                MouseButton::Left,
+                ElementState::Released,
+            )),
+        );
+        EventHandler::new(vec![command], None)
+    }
+    #[test]
+    fn test_event_handler() {
+        let mut event_handler = create_pressure_command_handler();
+        let pressing_left_button =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Pressed);
+        let pressing_left_button = event_handler.input(pressing_left_button);
+        assert!(pressing_left_button.is_some());
+        let pressure_event = WindowEvent::TouchpadPressure {
+            device_id: winit::event::DeviceId::dummy(),
+            pressure: 2.0,
+            stage: 0,
+        };
+        let pressure_event = event_handler.input(pressure_event);
+        assert!(pressure_event.is_some());
+        assert!(!pressure_event.unwrap());
+        let button_event = mouse_button_event_generator(MouseButton::Left, ElementState::Released);
+        let pressing_left_button = event_handler.input(button_event);
+        assert!(pressing_left_button.is_some());
+        assert!(pressing_left_button.unwrap());
+    }
+
+    #[test]
+    fn test_incomplete_event_handler() {
+        let mut event_handler = create_pressure_command_handler();
+        let pressing_left_button =
+            mouse_button_event_generator(MouseButton::Left, ElementState::Pressed);
+        let pressing_left_button = event_handler.input(pressing_left_button);
+        assert!(pressing_left_button.is_some());
+        let pressure_event = WindowEvent::TouchpadPressure {
+            device_id: winit::event::DeviceId::dummy(),
+            pressure: 2.0,
+            stage: 0,
+        };
+        let pressure_event = event_handler.input(pressure_event);
+        assert!(pressure_event.is_some());
+        assert!(!pressure_event.unwrap());
+        let button_event =
+            mouse_button_event_generator(MouseButton::Middle, ElementState::Released);
+        let pressing_left_button = event_handler.input(button_event);
+        assert!(pressing_left_button.is_none());
+    }
+
+    #[test]
+    fn test_invalid_event_handler() {
+        let mut event_handler = create_pressure_command_handler();
+        let button_event = mouse_button_event_generator(MouseButton::Left, ElementState::Released);
+        let pressing_left_button = event_handler.input(button_event);
+        assert!(pressing_left_button.is_none());
     }
 }
