@@ -52,12 +52,7 @@ impl<'a> State<'a> {
         // });
         
         let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
-        let render_pipeline_layout =
-            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[],
-                push_constant_ranges: &[],
-            });
+        let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
 
         let render_pipeline = device.create_render_pipeline(
             &wgpu::RenderPipelineDescriptor{
