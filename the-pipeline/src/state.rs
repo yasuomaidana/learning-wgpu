@@ -8,7 +8,6 @@ use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
 use winit::window::Window;
-use common::event_handler::pressure_event_handler::handle_pressure_event;
 
 pub struct State<'a> {
     surface: Surface<'a>,
@@ -65,7 +64,6 @@ impl<'a> State<'a> {
             "vs_main",
             "fs_main",
         );
-        
 
         Self {
             surface,
@@ -115,9 +113,9 @@ impl<'a> State<'a> {
                     a: 1.0,
                 },
             );
-            
+
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw(0..3,0..1);
+            render_pass.draw(0..3, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
