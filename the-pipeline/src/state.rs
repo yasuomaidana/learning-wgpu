@@ -1,6 +1,10 @@
-use common::state_builder::{create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config};
+use common::event_handler::pressure_event_handler::handle_pressure_event;
+use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline};
+use common::state_builder::{
+    create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
+};
 use std::sync::Arc;
-use wgpu::{Color, Device, PipelineCompilationOptions, Queue, RenderPipeline, Surface};
+use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
 use winit::window::Window;
@@ -44,56 +48,22 @@ impl<'a> State<'a> {
         let config = create_surface_config(size, surface_caps);
         surface.configure(&device, &config);
 
-
         // long way
         // let shader = device.create_shader_module(ShaderModuleDescriptor {
         //     label: Some("Shader"),
         //     source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         // });
-        
+
         let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
         let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
-
-        let render_pipeline = device.create_render_pipeline(
-            &wgpu::RenderPipelineDescriptor{
-                label:Some("Render Pipeline"),
-                layout: Some(&render_pipeline_layout),
-                vertex: wgpu::VertexState {
-                    module: &shader,
-                    entry_point: Some("vs_main"),
-                    buffers: &[],
-                    // compilation_options: Default::default(),
-                    compilation_options: PipelineCompilationOptions::default(),
-                },
-                fragment: Some(wgpu::FragmentState {
-                    module: &shader,
-                    entry_point: Some("fs_main"),
-                    targets: &[
-                        Some(wgpu::ColorTargetState {
-                            format: config.format,
-                            blend: Some(wgpu::BlendState::REPLACE),
-                            write_mask: wgpu::ColorWrites::ALL,
-                        })],
-                    compilation_options: PipelineCompilationOptions::default(),
-                }),
-                primitive: wgpu::PrimitiveState {
-                    topology: wgpu::PrimitiveTopology::TriangleList,
-                    strip_index_format: None,
-                    front_face: wgpu::FrontFace::Ccw,
-                    cull_mode: Some(wgpu::Face::Back),
-                    unclipped_depth: false,
-                    polygon_mode: wgpu::PolygonMode::Fill,
-                    conservative: false,
-                },
-                depth_stencil: None,
-                multisample: wgpu::MultisampleState {
-                    count: 1,
-                    mask: !0,
-                    alpha_to_coverage_enabled: false,
-                },
-                multiview: None,
-                cache: None,
-            }
+        let render_pipeline = create_render_pipeline(
+            &device,
+            &render_pipeline_layout,
+            &shader,
+            &config,
+            "Render Pipeline",
+            "vs_main",
+            "fs_main",
         );
         
 
