@@ -3,7 +3,7 @@ use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
 use std::sync::Arc;
-use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
+use wgpu::{Color, Device, Queue, RenderPipeline, ShaderModuleDescriptor, ShaderSource, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
@@ -14,10 +14,11 @@ pub struct State<'a> {
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
     blue: f64,
-    position: (f64, f64),
+    toggle_triangle: bool,
     window: Arc<Window>,
     // Pipeline
     render_pipeline: RenderPipeline,
+    challenge_pipeline: RenderPipeline,
 }
 
 impl<'a> State<'a> {
@@ -64,6 +65,23 @@ impl<'a> State<'a> {
             "fs_main",
         );
 
+        // Changed color
+        let shader = device.create_shader_module(ShaderModuleDescriptor {
+            label: Some("Challenge shader"),
+            source: ShaderSource::Wgsl(include_str!("challenge.wgsl").into()),
+        });
+
+        let render_pipeline_layout = create_pipeline_layout(&device, "Challenge Pipeline Layout");
+        let challenge_pipeline = create_render_pipeline(
+            &device,
+            &render_pipeline_layout,
+            &shader,
+            &config,
+            "Challenge Pipeline",
+            "vs_main",
+            "fs_main",
+        );
+
         Self {
             surface,
             device,
@@ -71,9 +89,10 @@ impl<'a> State<'a> {
             config,
             size,
             blue: 0.0,
-            position: (0.0, 0.0),
+            toggle_triangle: false,
             window: window_arc,
             render_pipeline,
+            challenge_pipeline,
         }
     }
 
@@ -84,6 +103,10 @@ impl<'a> State<'a> {
         self.config.height = new_size.height;
 
         self.surface.configure(&self.device, &self.config);
+    }
+
+    pub fn toggle(&mut self) {
+        self.toggle_triangle = !self.toggle_triangle;
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -114,7 +137,11 @@ impl<'a> State<'a> {
                 },
             );
 
-            render_pass.set_pipeline(&self.render_pipeline);
+            if self.toggle_triangle {
+                render_pass.set_pipeline(&self.challenge_pipeline);
+            } else {
+                render_pass.set_pipeline(&self.render_pipeline);
+            }
             render_pass.draw(0..3, 0..1);
         }
 

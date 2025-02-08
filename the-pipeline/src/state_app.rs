@@ -60,7 +60,11 @@ impl ApplicationHandler for StateApplication<'_> {
                     self.state.as_mut().unwrap().update();
                     self.event_handler.clear();
                 }
-                ButtonEvent::RightClick(_) => {
+                ButtonEvent::RightClick(click) => {
+                    if click.finished(){
+                        self.state.as_mut().unwrap().toggle();
+                    }
+                    self.state.as_mut().unwrap().update();
                     self.event_handler.clear();
                 }
                 ButtonEvent::OtherClick => {}
