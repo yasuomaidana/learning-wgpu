@@ -128,26 +128,8 @@ impl<'a> State<'a> {
         &self.window
     }
 
-    /// Handles input events and returns a boolean indicating whether the event has been fully processed.
-    ///
-    /// If the method returns `true`, the main loop won't process the event any further.
-    ///
-    /// # Arguments
-    ///
-    /// * `event` - A reference to the `WindowEvent` that needs to be processed.
-    ///
-    /// # Returns
-    ///
-    /// * `bool` - `true` if the event has been fully processed, `false` otherwise.
-    pub(crate) fn input(&mut self, event: &WindowEvent) -> bool {
-        match event {
-            WindowEvent::TouchpadPressure { pressure, .. } => {
-                self.blue = handle_pressure_event(*pressure, self.blue);
-                return true;
-            }
-            _ => {}
-        }
-        false
+    pub fn set_blue(&mut self, blue: f64) {
+        self.blue = blue;
     }
 
     pub fn update(&mut self) {
