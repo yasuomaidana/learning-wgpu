@@ -1,4 +1,3 @@
-use common::event_handler::pressure_event_handler::handle_pressure_event;
 use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline};
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
@@ -6,7 +5,6 @@ use common::state_builder::{
 use std::sync::Arc;
 use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
-use winit::event::WindowEvent;
 use winit::window::Window;
 
 pub struct State<'a> {
@@ -16,6 +14,7 @@ pub struct State<'a> {
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
     blue: f64,
+    position: (f64, f64),
     window: Arc<Window>,
     // Pipeline
     render_pipeline: RenderPipeline,
@@ -72,6 +71,7 @@ impl<'a> State<'a> {
             config,
             size,
             blue: 0.0,
+            position: (0.0, 0.0),
             window: window_arc,
             render_pipeline,
         }
