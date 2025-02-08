@@ -1,8 +1,10 @@
-use common::state_builder::{create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config};
+use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline};
+use common::state_builder::{
+    create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
+};
 use std::sync::Arc;
-use wgpu::{Color, Device, PipelineCompilationOptions, Queue, RenderPipeline, Surface};
+use wgpu::{Color, Device, Queue, RenderPipeline, ShaderModuleDescriptor, ShaderSource, Surface};
 use winit::dpi::PhysicalSize;
-use winit::event::WindowEvent;
 use winit::window::Window;
 
 pub struct State<'a> {
@@ -12,9 +14,11 @@ pub struct State<'a> {
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
     blue: f64,
+    toggle_triangle: bool,
     window: Arc<Window>,
     // Pipeline
     render_pipeline: RenderPipeline,
+    challenge_pipeline: RenderPipeline,
 }
 
 impl<'a> State<'a> {
@@ -43,63 +47,40 @@ impl<'a> State<'a> {
         let config = create_surface_config(size, surface_caps);
         surface.configure(&device, &config);
 
-
         // long way
         // let shader = device.create_shader_module(ShaderModuleDescriptor {
         //     label: Some("Shader"),
         //     source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         // });
-        
-        let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
-        let render_pipeline_layout =
-            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[],
-                push_constant_ranges: &[],
-            });
 
-        let render_pipeline = device.create_render_pipeline(
-            &wgpu::RenderPipelineDescriptor{
-                label:Some("Render Pipeline"),
-                layout: Some(&render_pipeline_layout),
-                vertex: wgpu::VertexState {
-                    module: &shader,
-                    entry_point: Some("vs_main"),
-                    buffers: &[],
-                    // compilation_options: Default::default(),
-                    compilation_options: PipelineCompilationOptions::default(),
-                },
-                fragment: Some(wgpu::FragmentState {
-                    module: &shader,
-                    entry_point: Some("fs_main"),
-                    targets: &[
-                        Some(wgpu::ColorTargetState {
-                            format: config.format,
-                            blend: Some(wgpu::BlendState::REPLACE),
-                            write_mask: wgpu::ColorWrites::ALL,
-                        })],
-                    compilation_options: PipelineCompilationOptions::default(),
-                }),
-                primitive: wgpu::PrimitiveState {
-                    topology: wgpu::PrimitiveTopology::TriangleList,
-                    strip_index_format: None,
-                    front_face: wgpu::FrontFace::Ccw,
-                    cull_mode: Some(wgpu::Face::Back),
-                    unclipped_depth: false,
-                    polygon_mode: wgpu::PolygonMode::Fill,
-                    conservative: false,
-                },
-                depth_stencil: None,
-                multisample: wgpu::MultisampleState {
-                    count: 1,
-                    mask: !0,
-                    alpha_to_coverage_enabled: false,
-                },
-                multiview: None,
-                cache: None,
-            }
+        let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
+        let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
+        let render_pipeline = create_render_pipeline(
+            &device,
+            &render_pipeline_layout,
+            &shader,
+            &config,
+            "Render Pipeline",
+            "vs_main",
+            "fs_main",
         );
-        
+
+        // Changed color
+        let shader = device.create_shader_module(ShaderModuleDescriptor {
+            label: Some("Challenge shader"),
+            source: ShaderSource::Wgsl(include_str!("challenge.wgsl").into()),
+        });
+
+        let render_pipeline_layout = create_pipeline_layout(&device, "Challenge Pipeline Layout");
+        let challenge_pipeline = create_render_pipeline(
+            &device,
+            &render_pipeline_layout,
+            &shader,
+            &config,
+            "Challenge Pipeline",
+            "vs_main",
+            "fs_main",
+        );
 
         Self {
             surface,
@@ -108,8 +89,10 @@ impl<'a> State<'a> {
             config,
             size,
             blue: 0.0,
+            toggle_triangle: false,
             window: window_arc,
             render_pipeline,
+            challenge_pipeline,
         }
     }
 
@@ -120,6 +103,10 @@ impl<'a> State<'a> {
         self.config.height = new_size.height;
 
         self.surface.configure(&self.device, &self.config);
+    }
+
+    pub fn toggle(&mut self) {
+        self.toggle_triangle = !self.toggle_triangle;
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -149,9 +136,13 @@ impl<'a> State<'a> {
                     a: 1.0,
                 },
             );
-            
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw(0..3,0..1);
+
+            if self.toggle_triangle {
+                render_pass.set_pipeline(&self.challenge_pipeline);
+            } else {
+                render_pass.set_pipeline(&self.render_pipeline);
+            }
+            render_pass.draw(0..3, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -164,27 +155,8 @@ impl<'a> State<'a> {
         &self.window
     }
 
-    /// Handles input events and returns a boolean indicating whether the event has been fully processed.
-    ///
-    /// If the method returns `true`, the main loop won't process the event any further.
-    ///
-    /// # Arguments
-    ///
-    /// * `event` - A reference to the `WindowEvent` that needs to be processed.
-    ///
-    /// # Returns
-    ///
-    /// * `bool` - `true` if the event has been fully processed, `false` otherwise.
-    pub(crate) fn input(&mut self, event: &WindowEvent) -> bool {
-        match event {
-            WindowEvent::TouchpadPressure { pressure, .. } => {
-                self.blue = *pressure as f64;
-                println!("Pressure: {}", pressure);
-                return true;
-            }
-            _ => {}
-        }
-        false
+    pub fn set_blue(&mut self, blue: f64) {
+        self.blue = blue;
     }
 
     pub fn update(&mut self) {

@@ -1,9 +1,11 @@
 use crate::state::State;
+
+use crate::event_handler::EventHandler;
+use common::event_handler::button_click::button_click::{ButtonClickEvent, ButtonEvent};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
-use crate::event_handler::event_handler::EventHandler;
 
 pub struct StateApplication<'a> {
     state: Option<State<'a>>,
@@ -22,7 +24,7 @@ impl<'a> StateApplication<'a> {
 impl ApplicationHandler for StateApplication<'_> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = event_loop
-            .create_window(Window::default_attributes().with_title("Hello, World!"))
+            .create_window(Window::default_attributes().with_title("The pipeline"))
             .expect("Failed to create window");
         self.state = Some(State::new(window));
     }
@@ -36,7 +38,7 @@ impl ApplicationHandler for StateApplication<'_> {
         let read_input = self.event_handler.input(event.clone());
         let window = self.state.as_ref().unwrap().window();
 
-        if window.id() == window_id && !read_input {
+        if window.id() == window_id && read_input.is_none() {
             match event {
                 WindowEvent::CloseRequested => {
                     event_loop.exit();
@@ -50,17 +52,23 @@ impl ApplicationHandler for StateApplication<'_> {
                 _ => {}
             }
         }
-        let current_stored = self.event_handler.get_current_event();
-
-        if let Some(current) = current_stored {
-            let redraw = self.state.as_mut().unwrap().input(current);
-            if redraw {
-                self.state.as_mut().unwrap().update();
+        if let Some(button_event) = read_input {
+            match button_event {
+                ButtonEvent::LeftClick(event) => {
+                    let blue_value = event.get_pressure();
+                    self.state.as_mut().unwrap().set_blue(blue_value as f64);
+                    self.state.as_mut().unwrap().update();
+                    self.event_handler.clear();
+                }
+                ButtonEvent::RightClick(click) => {
+                    if click.finished(){
+                        self.state.as_mut().unwrap().toggle();
+                    }
+                    self.state.as_mut().unwrap().update();
+                    self.event_handler.clear();
+                }
+                ButtonEvent::OtherClick => {}
             }
-        }
-
-        if read_input {
-            self.event_handler.clear();
         }
     }
 }

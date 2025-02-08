@@ -1,4 +1,5 @@
 use common::event_handler::event_command::EventCommand;
+use common::event_handler::pressure_event_handler::handle_pressure_event;
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
@@ -116,16 +117,21 @@ impl<'a> State<'a> {
     /// # Returns
     ///
     /// * `bool` - `true` if the event has been fully processed, `false` otherwise.
-    pub(crate) fn input(&mut self, event: &WindowEvent) -> bool {
-        match event {
-            WindowEvent::TouchpadPressure { pressure, .. } => {
-                self.blue = *pressure as f64;
-                println!("Pressure: {}", pressure);
-                return true;
+    pub(crate) fn input(&mut self, event: &EventCommand) -> bool {
+        let last_event = event.get_last_event();
+        println!("Last event: {:?}", last_event);
+        match last_event {
+            Some(last_event) => {
+                match last_event { 
+                    WindowEvent::TouchpadPressure { pressure, .. } => {
+                        self.blue = handle_pressure_event(*pressure, self.blue);
+                        true
+                    }
+                    _ => false
+                }
             }
-            _ => {}
+            None => false
         }
-        false
     }
 
     pub fn update(&mut self) {
