@@ -95,7 +95,7 @@ pub fn create_render_pass<'b>(
 
 // Here we can add the WASM specific code
 pub fn create_gpu_instance() -> Instance {
-    Instance::new(wgpu::InstanceDescriptor {
+    Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::PRIMARY,
         ..Default::default()
     })
