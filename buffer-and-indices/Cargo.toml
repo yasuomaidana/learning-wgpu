@@ -7,3 +7,5 @@ edition = "2021"
 wgpu = {workspace = true}
 winit = {workspace = true}
 pollster = {workspace = true}
+common = { workspace = true }
+bytemuck = { version = "1.21.0", features = [ "derive" ] }

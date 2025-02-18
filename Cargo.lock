@@ -219,6 +219,8 @@ dependencies = [
 name = "buffer-and-indices"
 version = "0.1.0"
 dependencies = [
+ "bytemuck",
+ "common",
  "pollster",
  "wgpu",
  "winit",
