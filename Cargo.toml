@@ -12,4 +12,4 @@ rayon = "1.10.0"
 common = { path = "common" }
 
 [workspace]
-members = [ "common", "initial-tutorial", "the-pipeline","the-surface"]
+members = [ "buffer-and-indices", "common", "initial-tutorial", "the-pipeline","the-surface"]

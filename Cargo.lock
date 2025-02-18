@@ -213,6 +213,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "buffer-and-indices"
+version = "0.1.0"
+dependencies = [
+ "pollster",
+ "wgpu",
+ "winit",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
