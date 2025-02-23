@@ -1,2 +1,2 @@
 pub mod const_values;
-mod vertex;
+pub mod vertex;
