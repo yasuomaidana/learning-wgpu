@@ -15,7 +15,6 @@ pub struct State<'a> {
     queue: Queue,
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
-    blue: f64,
     window: Arc<Window>,
     // Pipeline
     render_pipeline: RenderPipeline,
@@ -80,7 +79,6 @@ impl<'a> State<'a> {
             queue,
             config,
             size,
-            blue: 0.0,
             window: window_arc,
             render_pipeline,
             vertex_buffer,
@@ -119,7 +117,7 @@ impl<'a> State<'a> {
                 Color {
                     r: 0.1,
                     g: 0.2,
-                    b: self.blue,
+                    b: 0.0,
                     a: 1.0,
                 },
             );
@@ -136,10 +134,6 @@ impl<'a> State<'a> {
 
     pub fn window(&self) -> &Window {
         &self.window
-    }
-
-    pub fn set_blue(&mut self, blue: f64) {
-        self.blue = blue;
     }
 
     pub fn update(&mut self) {
