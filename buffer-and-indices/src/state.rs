@@ -64,7 +64,8 @@ impl<'a> State<'a> {
         });
 
         let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
-        let render_pipeline = create_render_pipeline(
+
+        let render_pipeline = create_render_pipeline_with_buffers(
             &device,
             &render_pipeline_layout,
             &shader,
@@ -72,6 +73,7 @@ impl<'a> State<'a> {
             "Render Pipeline",
             "vs_main",
             "fs_main",
+            &[Vertex::desc()],
         );
 
         // Vertex buffer
