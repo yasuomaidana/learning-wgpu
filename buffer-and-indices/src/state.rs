@@ -55,6 +55,14 @@ impl<'a> State<'a> {
         // });
 
         let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
+
+        // Vertex buffer
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(&VERTICES),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+
         let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
         let render_pipeline = create_render_pipeline(
             &device,
