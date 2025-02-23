@@ -1,10 +1,13 @@
 use crate::lib::const_values::VERTICES;
-use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline};
+use crate::lib::vertex::Vertex;
+use common::pipeline_builder::{
+    create_pipeline_layout, create_render_pipeline, create_render_pipeline_with_buffers,
+};
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
 use std::sync::Arc;
-use wgpu::util::DeviceExt; // Import the DeviceExt trait to use create_buffer_init 
+use wgpu::util::DeviceExt; // Import the DeviceExt trait to use create_buffer_init
 use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
@@ -20,6 +23,8 @@ pub struct State<'a> {
     render_pipeline: RenderPipeline,
     // Vertex buffer
     vertex_buffer: wgpu::Buffer,
+    // Vertices
+    num_vertices: u32,
 }
 
 impl<'a> State<'a> {
@@ -76,12 +81,7 @@ impl<'a> State<'a> {
             &[Vertex::desc()],
         );
 
-        // Vertex buffer
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTICES),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
+        let num_vertices = VERTICES.len() as u32;
 
         Self {
             surface,
@@ -92,6 +92,7 @@ impl<'a> State<'a> {
             window: window_arc,
             render_pipeline,
             vertex_buffer,
+            num_vertices
         }
     }
 
@@ -133,7 +134,8 @@ impl<'a> State<'a> {
             );
 
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw(0..3, 0..1);
+            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+            render_pass.draw(0..self.num_vertices, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
