@@ -15,9 +15,51 @@
 //!
 //! > If your struct includes types that don't implement Pod and Zeroable, you'll need to implement these traits manually. These traits don't require us to implement any methods, so we just need to use the following to get our code to work.
 //!
+
+use wgpu::vertex_attr_array;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct Vertex {
+pub struct Vertex<'a> {
     pub(crate) position: [f32; 3],
     pub(crate) color: [f32; 3],
+}
+
+impl<'a> Vertex<'a> {
+    /// Vertex attributes for the `Vertex` struct.
+    /// This array defines the layout of the vertex data in the buffer.
+    const ATTRIBUTES: [wgpu::VertexAttribute; 2] =
+        vertex_attr_array![0 => Float32x3, 1 => Float32x3];
+    
+    /// Long way
+    ///
+    /// ```rust
+    /// fn desc() -> wgpu::VertexBufferLayout<'static> {
+    ///         wgpu::VertexBufferLayout {
+    ///             array_stride: size_of::<Vertex>() as wgpu::BufferAddress,
+    ///             step_mode: wgpu::VertexStepMode::Vertex,
+    ///             attributes: &[
+    ///                 wgpu::VertexAttribute {
+    ///                     offset: 0,
+    ///                     shader_location: 0,
+    ///                     format: wgpu::VertexFormat::Float32x3,
+    ///                 },
+    ///                 wgpu::VertexAttribute {
+    ///                     offset: size_of::<[f32; 3]>() as wgpu::BufferAddress,
+    ///                     shader_location: 1,
+    ///                     format: wgpu::VertexFormat::Float32x3,
+    ///                 },
+    ///             ],
+    ///         }
+    ///     }
+    /// ```
+    ///
+
+    fn desc() -> wgpu::VertexBufferLayout<'static> {
+        wgpu::VertexBufferLayout {
+            array_stride: size_of::<Vertex>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &Self::ATTRIBUTES,
+        }
+    }
 }
