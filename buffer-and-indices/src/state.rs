@@ -1,4 +1,4 @@
-use crate::lib::const_values::VERTICES;
+use crate::lib::const_values::{INDICES, VERTICES};
 use crate::lib::vertex::Vertex;
 use common::pipeline_builder::{
     create_pipeline_layout, create_render_pipeline, create_render_pipeline_with_buffers,
@@ -23,8 +23,10 @@ pub struct State<'a> {
     render_pipeline: RenderPipeline,
     // Vertex buffer
     vertex_buffer: wgpu::Buffer,
+    // Index buffer
+    index_buffer: wgpu::Buffer,
     // Vertices
-    num_vertices: u32,
+    num_indices: u32,
 }
 
 impl<'a> State<'a> {
@@ -68,6 +70,15 @@ impl<'a> State<'a> {
             usage: wgpu::BufferUsages::VERTEX,
         });
 
+        // Index buffer
+        let index_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Index Buffer"),
+                contents: bytemuck::cast_slice(INDICES),
+                usage: wgpu::BufferUsages::INDEX,
+            }
+        );
+
         let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
 
         let render_pipeline = create_render_pipeline_with_buffers(
@@ -81,7 +92,7 @@ impl<'a> State<'a> {
             &[Vertex::desc()],
         );
 
-        let num_vertices = VERTICES.len() as u32;
+        let num_indices = INDICES.len() as u32;
 
         Self {
             surface,
@@ -92,7 +103,8 @@ impl<'a> State<'a> {
             window: window_arc,
             render_pipeline,
             vertex_buffer,
-            num_vertices
+            index_buffer,
+            num_indices
         }
     }
 
@@ -126,8 +138,8 @@ impl<'a> State<'a> {
                 &mut encoder,
                 &view,
                 Color {
-                    r: 0.1,
-                    g: 0.2,
+                    r: 0.0,
+                    g: 0.0,
                     b: 0.0,
                     a: 1.0,
                 },
@@ -135,7 +147,7 @@ impl<'a> State<'a> {
 
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.draw(0..self.num_vertices, 0..1);
+            render_pass.draw(0..self.num_indices, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
