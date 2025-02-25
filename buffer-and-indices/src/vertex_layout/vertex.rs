@@ -26,7 +26,7 @@ pub struct Vertex {
     pub(crate) color: [f32; 3],
 }
 
-impl Vertex {
+impl<'a> Vertex {
     /// Vertex attributes for the `Vertex` struct.
     /// This array defines the layout of the vertex data in the buffer.
     const ATTRIBUTES: [wgpu::VertexAttribute; 2] =
@@ -56,7 +56,7 @@ impl Vertex {
     /// ```
     ///
 
-    pub fn desc() -> wgpu::VertexBufferLayout<'static> {
+    pub fn desc() -> wgpu::VertexBufferLayout<'a> {
         wgpu::VertexBufferLayout {
             array_stride: size_of::<Self>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
