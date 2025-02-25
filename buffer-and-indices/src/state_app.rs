@@ -58,5 +58,17 @@ impl ApplicationHandler for StateApplication<'_> {
                 _ => {}
             }
         }
+        match read_input {
+            None => {}
+            Some(action) => {
+                match action {
+                    Action::ChangeFigure => {
+                        self.state.as_mut().unwrap().update();
+                    }
+                    _ => {}
+                }
+                self.event_handler.clear();
+            }
+        }
     }
 }
