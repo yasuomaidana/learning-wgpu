@@ -1,7 +1,8 @@
 use crate::state::State;
 
+pub use common::event_handler::event::InputEventTrait;
 use crate::event_handler::EventHandler;
-use common::event_handler::button_click::button_click::{ButtonClickEvent, ButtonEvent};
+use common::event_handler::button_click::button_click::ButtonEvent;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;

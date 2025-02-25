@@ -1,8 +1,7 @@
-use common::event_handler::button_click::button_click::{
-    ButtonClick, ButtonClickEvent, ButtonEvent,
-};
+use common::event_handler::button_click::button_click::{ButtonClick, ButtonEvent};
 // use winit::dpi::PhysicalPosition;
 // use winit::event::WindowEvent::CursorMoved;
+use common::event_handler::event::InputEventTrait;
 use winit::event::{MouseButton, WindowEvent};
 
 pub struct EventHandler {
