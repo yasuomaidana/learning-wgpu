@@ -1,7 +1,6 @@
 use crate::state::State;
 
-// use crate::event_handler::EventHandler;
-use common::event_handler::button_click::button_click::{ButtonClickEvent, ButtonEvent};
+use crate::keyboard_handler::{Action, KeyboardHandler};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
@@ -9,14 +8,14 @@ use winit::window::{Window, WindowId};
 
 pub struct StateApplication<'a> {
     state: Option<State<'a>>,
-    // event_handler: EventHandler,
+    event_handler: KeyboardHandler,
 }
 
 impl<'a> StateApplication<'a> {
     pub fn new() -> StateApplication<'a> {
         StateApplication {
             state: None,
-            // event_handler: EventHandler::new(),
+            event_handler: KeyboardHandler::new(),
         }
     }
 }
@@ -24,7 +23,7 @@ impl<'a> StateApplication<'a> {
 impl ApplicationHandler for StateApplication<'_> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = event_loop
-            .create_window(Window::default_attributes().with_title("The pipeline"))
+            .create_window(Window::default_attributes().with_title("Buffer and indices"))
             .expect("Failed to create window");
         self.state = Some(State::new(window));
     }
@@ -35,11 +34,17 @@ impl ApplicationHandler for StateApplication<'_> {
         window_id: WindowId,
         event: WindowEvent,
     ) {
-        // let read_input = self.event_handler.input(event.clone());
-        let read_input: Option<bool> = None;
+        self.event_handler.input(&event);
+        let read_input = self.event_handler.get_action();
         let window = self.state.as_ref().unwrap().window();
-
-        if window.id() == window_id && read_input.is_none() {
+        let quit = read_input.as_ref().map_or(false, |action| match action {
+            Action::Quit => true,
+            _ => false,
+        });
+        if window.id() == window_id || quit {
+            if quit {
+                event_loop.exit();
+            }
             match event {
                 WindowEvent::CloseRequested => {
                     event_loop.exit();
@@ -53,8 +58,5 @@ impl ApplicationHandler for StateApplication<'_> {
                 _ => {}
             }
         }
-        // if let Some(button_event) = read_input {
-        //     
-        // }
     }
 }
