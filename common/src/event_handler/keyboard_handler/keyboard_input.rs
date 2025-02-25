@@ -1,7 +1,7 @@
 use crate::event_handler::event::InputEventTrait;
 use winit::event::{KeyEvent, WindowEvent};
 
-struct SingleKeyboardInput {
+pub struct SingleKeyboardInput {
     pub key: String,
     started: bool,
     finished: bool,
@@ -9,6 +9,7 @@ struct SingleKeyboardInput {
 
 impl SingleKeyboardInput {
     pub fn new(key: String) -> Self {
+        let key = key.to_lowercase();
         SingleKeyboardInput {
             key,
             started: false,
@@ -26,10 +27,11 @@ impl InputEventTrait<'_, String> for SingleKeyboardInput {
         match event {
             WindowEvent::KeyboardInput { event, .. } => {
                 let key = event
-                    .clone()
                     .text
+                    .as_ref()
                     .map(|c| c.to_string())
-                    .unwrap_or("".to_string());
+                    .unwrap_or("".to_string()).to_lowercase();
+                
                 if key == self.key {
                     match event {
                         KeyEvent { state, .. } => match state {
