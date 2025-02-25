@@ -1,16 +1,9 @@
+use crate::event_handler::event::InputEventTrait;
 use crate::event_handler::event_command::{default_compare_events, mouse_button_event_generator};
 use std::collections::VecDeque;
 use winit::event::{ElementState, MouseButton, WindowEvent};
 
 const QUEUE_SIZE: usize = 10;
-
-pub trait ButtonClickEvent {
-    fn finished(&self) -> bool;
-    fn update(&mut self, event: &WindowEvent);
-    fn in_progress(&self) -> bool;
-    fn get_button_event(&self) -> Option<ButtonEvent>;
-    fn clear(&mut self);
-}
 
 pub enum ButtonEvent<'a> {
     LeftClick(&'a ButtonClick),
@@ -67,7 +60,18 @@ fn validate_value<T>(queue: &mut VecDeque<T>, value: T) {
     }
     queue.push_back(value);
 }
-impl ButtonClickEvent for ButtonClick {
+
+impl ButtonClick {
+    pub fn get_button_event(&self) -> Option<ButtonEvent> {
+        match self.get_event() {
+            Ok(event) => event,
+            Err(message) => panic!("{:?}", message),
+        }
+    }
+}
+
+//TODO: Implement the EventHandler trait for ButtonClick
+impl<'a> InputEventTrait<'a, ButtonEvent<'a>> for ButtonClick {
     fn finished(&self) -> bool {
         self.finished
     }
@@ -91,17 +95,17 @@ impl ButtonClickEvent for ButtonClick {
         self.started && !self.finished
     }
 
-    fn get_button_event(&self) -> Option<ButtonEvent> {
+    fn get_event(&'a self) -> Result<Option<ButtonEvent<'a>>, String> {
         if !self.started {
-            None
+            Ok(None)
         } else {
             match self.starting_event {
                 WindowEvent::MouseInput { button, .. } => match button {
-                    MouseButton::Left => Some(ButtonEvent::LeftClick(self)),
-                    MouseButton::Right => Some(ButtonEvent::RightClick(self)),
-                    _ => panic!("Button not supported"),
+                    MouseButton::Left => Ok(Some(ButtonEvent::LeftClick(self))),
+                    MouseButton::Right => Ok(Some(ButtonEvent::RightClick(self))),
+                    _ => Err("Button not supported".to_string()),
                 },
-                _ => panic!("Button not supported"),
+                _ => Err("Button not supported".to_string()),
             }
         }
     }

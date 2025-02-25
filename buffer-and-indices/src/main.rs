@@ -1,7 +1,11 @@
+use crate::state_app::StateApplication;
+use common::run;
 
-mod lib;
+mod keyboard_handler;
 mod state;
+mod state_app;
+mod vertex_layout;
 
 fn main() {
-    println!("Hello, world!");
+    pollster::block_on(run(StateApplication::new()));
 }

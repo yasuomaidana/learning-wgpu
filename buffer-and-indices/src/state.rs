@@ -1,10 +1,12 @@
-use crate::lib::const_values::VERTICES;
-use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline};
+use crate::vertex_layout::const_values::{INDICES, VERTICES};
+use crate::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
+use crate::vertex_layout::vertex::Vertex;
+use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline_with_buffers};
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
 use std::sync::Arc;
-use wgpu::util::DeviceExt; // Import the DeviceExt trait to use create_buffer_init 
+use wgpu::util::DeviceExt; // Import the DeviceExt trait to use create_buffer_init
 use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
@@ -15,12 +17,16 @@ pub struct State<'a> {
     queue: Queue,
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
-    blue: f64,
     window: Arc<Window>,
     // Pipeline
     render_pipeline: RenderPipeline,
     // Vertex buffer
-    vertex_buffer: wgpu::Buffer,
+    vertex_buffers: Vec<wgpu::Buffer>,
+    // Index buffer
+    index_buffers: Vec<wgpu::Buffer>,
+    // Vertices
+    // num_indices: u32,
+    toggled: bool,
 }
 
 impl<'a> State<'a> {
@@ -56,8 +62,38 @@ impl<'a> State<'a> {
         // });
 
         let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
+
+        // Vertex buffer
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(&VERTICES),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+
+        // Index buffer
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Hex Index Buffer"),
+            contents: bytemuck::cast_slice(&INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+
+        // Vertex buffer
+        let hex_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Hex Vertex Buffer"),
+            contents: bytemuck::cast_slice(&HEX_VERTICES),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+
+        // Index buffer
+        let hex_index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Hex Index Buffer"),
+            contents: bytemuck::cast_slice(&HEX_INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+
         let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
-        let render_pipeline = create_render_pipeline(
+
+        let render_pipeline = create_render_pipeline_with_buffers(
             &device,
             &render_pipeline_layout,
             &shader,
@@ -65,14 +101,8 @@ impl<'a> State<'a> {
             "Render Pipeline",
             "vs_main",
             "fs_main",
+            &[Vertex::desc()],
         );
-
-        // Vertex buffer
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTICES),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
 
         Self {
             surface,
@@ -80,10 +110,12 @@ impl<'a> State<'a> {
             queue,
             config,
             size,
-            blue: 0.0,
             window: window_arc,
             render_pipeline,
-            vertex_buffer,
+            vertex_buffers: vec![vertex_buffer, hex_vertex_buffer],
+            index_buffers: vec![index_buffer, hex_index_buffer],
+            // num_indices,
+            toggled: false,
         }
     }
 
@@ -112,20 +144,35 @@ impl<'a> State<'a> {
             });
 
         {
-            // println!("Blue: {}", self.blue);
             let mut render_pass = create_render_pass(
                 &mut encoder,
                 &view,
                 Color {
-                    r: 0.1,
-                    g: 0.2,
-                    b: self.blue,
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
                     a: 1.0,
                 },
             );
 
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw(0..3, 0..1);
+            let vertex_buffer;
+            let index_buffer;
+            let num_indices;
+            if !self.toggled {
+                vertex_buffer = &self.vertex_buffers[0];
+                index_buffer = &self.index_buffers[0];
+                num_indices = INDICES.len() as u32;
+            } else {
+                vertex_buffer = &self.vertex_buffers[1];
+                index_buffer = &self.index_buffers[1];
+                num_indices = HEX_INDICES.len() as u32;
+            }
+
+            render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+            render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+            // render_pass.draw(0..self.num_indices, 0..1);
+            render_pass.draw_indexed(0..num_indices, 0, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -138,12 +185,9 @@ impl<'a> State<'a> {
         &self.window
     }
 
-    pub fn set_blue(&mut self, blue: f64) {
-        self.blue = blue;
-    }
-
     pub fn update(&mut self) {
         // Update the state of the application
+        self.toggled = !self.toggled;
         self.render().unwrap();
     }
 }

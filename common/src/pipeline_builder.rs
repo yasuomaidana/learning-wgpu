@@ -1,4 +1,7 @@
-use wgpu::{Device, PipelineCompilationOptions, PipelineLayout, PipelineLayoutDescriptor, RenderPipeline, ShaderModule};
+use wgpu::{
+    Device, PipelineCompilationOptions, PipelineLayout, PipelineLayoutDescriptor, RenderPipeline,
+    ShaderModule,
+};
 
 pub fn create_pipeline_layout(device: &Device, label_name: &str) -> PipelineLayout {
     device.create_pipeline_layout(&PipelineLayoutDescriptor {
@@ -8,7 +11,7 @@ pub fn create_pipeline_layout(device: &Device, label_name: &str) -> PipelineLayo
     })
 }
 
-pub fn create_render_pipeline(
+pub fn create_render_pipeline_with_buffers(
     device: &Device,
     pipeline_layout: &PipelineLayout,
     shader_module: &ShaderModule,
@@ -16,6 +19,7 @@ pub fn create_render_pipeline(
     pipe_line_label: &str,
     vertex_entrypoint: &str,
     fragment_entrypoint: &str,
+    buffers: &[wgpu::VertexBufferLayout],
 ) -> RenderPipeline {
     device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some(pipe_line_label),
@@ -23,7 +27,7 @@ pub fn create_render_pipeline(
         vertex: wgpu::VertexState {
             module: shader_module,
             entry_point: Some(vertex_entrypoint),
-            buffers: &[],
+            buffers,
             // compilation_options: Default::default(),
             compilation_options: PipelineCompilationOptions::default(),
         },
@@ -55,4 +59,25 @@ pub fn create_render_pipeline(
         multiview: None,
         cache: None,
     })
+}
+
+pub fn create_render_pipeline(
+    device: &Device,
+    pipeline_layout: &PipelineLayout,
+    shader_module: &ShaderModule,
+    config: &wgpu::SurfaceConfiguration,
+    pipe_line_label: &str,
+    vertex_entrypoint: &str,
+    fragment_entrypoint: &str,
+) -> RenderPipeline {
+    create_render_pipeline_with_buffers(
+        device,
+        pipeline_layout,
+        shader_module,
+        config,
+        pipe_line_label,
+        vertex_entrypoint,
+        fragment_entrypoint,
+        &[],
+    )
 }
