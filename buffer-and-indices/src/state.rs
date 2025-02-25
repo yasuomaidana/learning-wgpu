@@ -1,8 +1,6 @@
 use crate::lib::const_values::{INDICES, VERTICES};
 use crate::lib::vertex::Vertex;
-use common::pipeline_builder::{
-    create_pipeline_layout, create_render_pipeline, create_render_pipeline_with_buffers,
-};
+use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline_with_buffers};
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
@@ -71,13 +69,11 @@ impl<'a> State<'a> {
         });
 
         // Index buffer
-        let index_buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Index Buffer"),
-                contents: bytemuck::cast_slice(INDICES),
-                usage: wgpu::BufferUsages::INDEX,
-            }
-        );
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Index Buffer"),
+            contents: bytemuck::cast_slice(&INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
 
         let render_pipeline_layout = create_pipeline_layout(&device, "Render Pipeline Layout");
 
@@ -104,7 +100,7 @@ impl<'a> State<'a> {
             render_pipeline,
             vertex_buffer,
             index_buffer,
-            num_indices
+            num_indices,
         }
     }
 
@@ -147,7 +143,9 @@ impl<'a> State<'a> {
 
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.draw(0..self.num_indices, 0..1);
+            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
+                                                                                                  // render_pass.draw(0..self.num_indices, 0..1);
+            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
