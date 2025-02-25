@@ -31,7 +31,7 @@ impl Vertex {
     /// This array defines the layout of the vertex data in the buffer.
     const ATTRIBUTES: [wgpu::VertexAttribute; 2] =
         vertex_attr_array![0 => Float32x3, 1 => Float32x3];
-    
+
     /// Long way
     ///
     /// ```rust
@@ -58,7 +58,7 @@ impl Vertex {
 
     pub fn desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-            array_stride: size_of::<Vertex>() as wgpu::BufferAddress,
+            array_stride: size_of::<Self>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &Self::ATTRIBUTES,
         }

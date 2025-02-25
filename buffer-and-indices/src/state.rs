@@ -1,5 +1,5 @@
-use crate::lib::const_values::{INDICES, VERTICES};
-use crate::lib::vertex::Vertex;
+use crate::vertex_layout::const_values::{INDICES, VERTICES};
+use crate::vertex_layout::vertex::Vertex;
 use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline_with_buffers};
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,

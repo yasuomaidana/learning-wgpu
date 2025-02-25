@@ -1,10 +1,10 @@
-use common::run;
 use crate::state_app::StateApplication;
+use common::run;
 
-mod lib;
+mod keyboard_handler;
 mod state;
 mod state_app;
-mod keyboard_handler;
+mod vertex_layout;
 
 fn main() {
     pollster::block_on(run(StateApplication::new()));
