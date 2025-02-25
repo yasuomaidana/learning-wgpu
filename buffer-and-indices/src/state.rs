@@ -1,4 +1,5 @@
 use crate::vertex_layout::const_values::{INDICES, VERTICES};
+use crate::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
 use crate::vertex_layout::vertex::Vertex;
 use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline_with_buffers};
 use common::state_builder::{
@@ -20,11 +21,12 @@ pub struct State<'a> {
     // Pipeline
     render_pipeline: RenderPipeline,
     // Vertex buffer
-    vertex_buffer: wgpu::Buffer,
+    vertex_buffers: Vec<wgpu::Buffer>,
     // Index buffer
-    index_buffer: wgpu::Buffer,
+    index_buffers: Vec<wgpu::Buffer>,
     // Vertices
-    num_indices: u32,
+    // num_indices: u32,
+    toggled: bool,
 }
 
 impl<'a> State<'a> {
@@ -70,8 +72,22 @@ impl<'a> State<'a> {
 
         // Index buffer
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Index Buffer"),
+            label: Some("Hex Index Buffer"),
             contents: bytemuck::cast_slice(&INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+
+        // Vertex buffer
+        let hex_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Hex Vertex Buffer"),
+            contents: bytemuck::cast_slice(&HEX_VERTICES),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+
+        // Index buffer
+        let hex_index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Hex Index Buffer"),
+            contents: bytemuck::cast_slice(&HEX_INDICES),
             usage: wgpu::BufferUsages::INDEX,
         });
 
@@ -88,8 +104,6 @@ impl<'a> State<'a> {
             &[Vertex::desc()],
         );
 
-        let num_indices = INDICES.len() as u32;
-
         Self {
             surface,
             device,
@@ -98,9 +112,10 @@ impl<'a> State<'a> {
             size,
             window: window_arc,
             render_pipeline,
-            vertex_buffer,
-            index_buffer,
-            num_indices,
+            vertex_buffers: vec![vertex_buffer, hex_vertex_buffer],
+            index_buffers: vec![index_buffer, hex_index_buffer],
+            // num_indices,
+            toggled: false,
         }
     }
 
@@ -129,7 +144,6 @@ impl<'a> State<'a> {
             });
 
         {
-            // println!("Blue: {}", self.blue);
             let mut render_pass = create_render_pass(
                 &mut encoder,
                 &view,
@@ -142,10 +156,23 @@ impl<'a> State<'a> {
             );
 
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
-                                                                                                  // render_pass.draw(0..self.num_indices, 0..1);
-            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+            let vertex_buffer;
+            let index_buffer;
+            let num_indices;
+            if !self.toggled {
+                vertex_buffer = &self.vertex_buffers[0];
+                index_buffer = &self.index_buffers[0];
+                num_indices = INDICES.len() as u32;
+            } else {
+                vertex_buffer = &self.vertex_buffers[1];
+                index_buffer = &self.index_buffers[1];
+                num_indices = HEX_INDICES.len() as u32;
+            }
+
+            render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+            render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+            // render_pass.draw(0..self.num_indices, 0..1);
+            render_pass.draw_indexed(0..num_indices, 0, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -160,6 +187,7 @@ impl<'a> State<'a> {
 
     pub fn update(&mut self) {
         // Update the state of the application
+        self.toggled = !self.toggled;
         self.render().unwrap();
     }
 }
