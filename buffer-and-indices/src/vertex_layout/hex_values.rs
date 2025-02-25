@@ -1,6 +1,6 @@
 use crate::vertex_layout::vertex::Vertex;
 
-pub const VERTICES: &[Vertex] = &[
+pub const HEX_VERTICES: &[Vertex] = &[
     Vertex {
         position: [0.1961161, -0.1961161, 0.0],
         color: [0.00, 0.50, 0.00],
@@ -27,4 +27,4 @@ pub const VERTICES: &[Vertex] = &[
     },
 ];
 
-pub const INDICES: &[u16] = &[2, 5, 0, 4, 2, 3, 1, 2, 0, 2, 4, 5];
+pub const HEX_INDICES: &[u16] = &[2, 5, 0, 4, 2, 3, 1, 2, 0, 2, 4, 5];
