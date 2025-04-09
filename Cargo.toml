@@ -10,6 +10,7 @@ winit = "0.30.5"
 pollster = "0.4.0"
 rayon = "1.10.0"
 common = { path = "common" }
+utils = { path = "utils" }
 
 [workspace]
 members = [ "buffer-and-indices", "common", "initial-tutorial", "textures-and-bind-groups", "the-pipeline","the-surface", "utils"]
