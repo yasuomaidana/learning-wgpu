@@ -2985,9 +2985,12 @@ dependencies = [
 name = "textures-and-bind-groups"
 version = "0.1.0"
 dependencies = [
+ "bytemuck",
+ "common",
  "image",
  "utils",
  "wgpu",
+ "winit",
 ]
 
 [[package]]

@@ -10,3 +10,6 @@ features = ["jpeg", "png"]
 [dependencies]
 wgpu = { workspace = true }
 utils = {workspace = true}
+common = {workspace = true}
+winit = { workspace = true}
+bytemuck = { workspace = true }
