@@ -55,11 +55,67 @@ impl<'a> State<'a> {
         let config = create_surface_config(size, surface_caps);
         surface.configure(&device, &config);
 
-        // long way
-        // let shader = device.create_shader_module(ShaderModuleDescriptor {
-        //     label: Some("Shader"),
-        //     source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
-        // });
+        // Embeds the image files as a byte array at compile time, making it part of the binary
+        let diffuse_bytes = include_bytes!("happy-tree.png");
+        // Decodes the byte array into an image object using the image crate
+        let diffuse = image::load_from_memory(diffuse_bytes).unwrap();
+        // Converts the image object into a texture format that WGPU can use (RGBA8)
+        let diffuse_rgba = diffuse.to_rgba8();
+
+        let dimensions = diffuse_rgba.dimensions();
+
+        let texture_size = wgpu::Extent3d {
+            width: dimensions.0,
+            height: dimensions.1,
+            /// All textures are stored as 3D, we represent our 2D texture
+            /// by setting depth to 1.
+            /// To determine the depth of your texture, you need to know the number of layers in your
+            /// 3D texture. If you are working with a 3D texture file, the depth is typically specified in the file's metadata or format.
+            depth_or_array_layers: 1,
+        };
+
+        let diffuse_texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Diffuse Texture"),
+            size: texture_size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            /// Most images are stored using sRGB, so we need to reflect that here.
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            /// TEXTURE_BINDING tells wgpu that we want to use this texture in shaders
+            /// COPY_DST means that we want to copy data to this texture
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            /// This is the same as with the SurfaceConfig. It
+            /// specifies what texture formats can be used to
+            /// create TextureViews for this texture. The base
+            /// texture format (Rgba8UnormSrgb in this case) is
+            /// always supported. Note that using a different
+            /// texture format is not supported on the WebGL2
+            /// backend.
+            view_formats: &[],
+        });
+
+        queue.write_texture(
+            /// Tells wgpu where to copy the pixel data
+            wgpu::TexelCopyTextureInfo {
+                texture: &diffuse_texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            /// The pixel data to copy. This is a slice of bytes
+            &diffuse_rgba,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                /// Defines the number of bytes in a single row of the texture.
+                /// Since the texture is in RGBA8 format (4 bytes per pixel), this is calculated
+                /// as `4 * dimensions.0` (width of the texture in pixels).
+                bytes_per_row: Some(4 * dimensions.0),
+                ///  Specifies the number of rows in the texture. This is set to the height of the texture
+                rows_per_image: Some(dimensions.1),
+            },
+            texture_size,
+        );
 
         let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
 
