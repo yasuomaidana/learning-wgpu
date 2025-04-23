@@ -11,6 +11,18 @@ pub fn create_pipeline_layout(device: &Device, label_name: &str) -> PipelineLayo
     })
 }
 
+pub fn create_pipeline_layout_with_bind_groups(
+    device: &Device,
+    label_name: &str,
+    bind_group_layouts: &[&wgpu::BindGroupLayout],
+) -> PipelineLayout {
+    device.create_pipeline_layout(&PipelineLayoutDescriptor {
+        label: Some(label_name),
+        bind_group_layouts,
+        push_constant_ranges: &[],
+    })
+}
+
 pub fn create_render_pipeline_with_buffers(
     device: &Device,
     pipeline_layout: &PipelineLayout,
