@@ -1,15 +1,17 @@
 [package]
 name = "learning-wpu"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace.dependencies]
-env_logger = "0.11.5"
-wgpu = "24.0.1"
-winit = "0.30.5"
+env_logger = "0.11.8"
+wgpu = "24.0.3"
+winit = "0.30.9"
 pollster = "0.4.0"
 rayon = "1.10.0"
 common = { path = "common" }
+utils = { path = "utils" }
+bytemuck = { version = "1.22.0", features = ["derive"] }
 
 [workspace]
-members = [ "buffer-and-indices", "common", "initial-tutorial", "the-pipeline","the-surface"]
+members = [ "buffer-and-indices", "common", "initial-tutorial", "textures-and-bind-groups", "the-pipeline","the-surface", "utils"]

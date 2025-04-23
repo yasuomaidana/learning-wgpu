@@ -1,0 +1,16 @@
+[package]
+name = "textures-and-bind-groups"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies.image]
+version = "0.25.6"
+default-features = true
+features = ["jpeg", "png"]
+[dependencies]
+wgpu = { workspace = true }
+utils = {workspace = true}
+common = {workspace = true}
+winit = { workspace = true}
+bytemuck = { workspace = true }
+pollster = {workspace = true}
