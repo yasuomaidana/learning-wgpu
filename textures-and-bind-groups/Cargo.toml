@@ -13,3 +13,4 @@ utils = {workspace = true}
 common = {workspace = true}
 winit = { workspace = true}
 bytemuck = { workspace = true }
+pollster = {workspace = true}

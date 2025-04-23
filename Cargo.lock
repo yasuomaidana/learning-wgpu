@@ -2988,6 +2988,7 @@ dependencies = [
  "bytemuck",
  "common",
  "image",
+ "pollster",
  "utils",
  "wgpu",
  "winit",
