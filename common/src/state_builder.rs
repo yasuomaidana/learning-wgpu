@@ -46,8 +46,8 @@ pub fn create_device(adapter: &Adapter) -> (Device, Queue) {
                 required_limits: wgpu::Limits::default(),
                 label: None,
                 memory_hints: Default::default(),
+                trace: Default::default(),
             },
-            None,
         )
         .block_on()
         .unwrap()
