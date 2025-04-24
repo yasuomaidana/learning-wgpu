@@ -1,3 +1,12 @@
+/// A macro to load an image file at compile time and extract its RGBA data and dimensions.
+///
+/// # Parameters
+/// - `$filename`: The path to the image file to be embedded and processed.
+///
+/// # Returns
+/// A tuple containing:
+/// - `image::RgbaImage`: The RGBA image data.
+/// - `(u32, u32)`: The width and height of the image in pixels.
 #[macro_export]
 macro_rules! get_rgba_image_and_dimensions {
     ($filename:expr) => {{
