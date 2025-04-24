@@ -202,23 +202,17 @@ impl<'a> State<'a> {
                 },
             );
 
-            let vertex_buffer;
-            let index_buffer;
-            let num_indices;
-            
-            if !self.toggled {
-                render_pass.set_pipeline(&self.render_pipelines[0]);
-                vertex_buffer = &self.vertex_buffers[0];
-                index_buffer = &self.index_buffers[0];
-                render_pass.set_bind_group(0, &self.diffuse_bind_groups[0], &[]);
-                num_indices = INDICES.len() as u32;
+            let selected = if self.toggled { 1 } else { 0 };
+            render_pass.set_pipeline(&self.render_pipelines[selected]);
+            let vertex_buffer = &self.vertex_buffers[selected];
+            let index_buffer = &self.index_buffers[selected];
+            render_pass.set_bind_group(0, &self.diffuse_bind_groups[selected], &[]);
+
+            let num_indices = if !self.toggled {
+                INDICES.len() as u32
             } else {
-                render_pass.set_pipeline(&self.render_pipelines[1]);
-                vertex_buffer = &self.vertex_buffers[1];
-                index_buffer = &self.index_buffers[1];
-                render_pass.set_bind_group(0, &self.diffuse_bind_groups[1], &[]);
-                num_indices = HEX_INDICES.len() as u32;
-            }
+                HEX_INDICES.len() as u32
+            };
 
             render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
             render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
