@@ -12,3 +12,4 @@ winit = { workspace = true }
 bytemuck = { workspace = true }
 pollster = { workspace = true }
 image = { workspace = true }
+state-derive = { workspace = true }
