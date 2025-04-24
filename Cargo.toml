@@ -12,6 +12,7 @@ rayon = "1.10.0"
 common = { path = "common" }
 utils = { path = "utils" }
 bytemuck = { version = "1.22.0", features = ["derive"] }
+image = { version = "0.25.6", default-features = true, features = ["jpeg", "png"] }
 
 [workspace]
 members = [ "buffer-and-indices", "common", "initial-tutorial", "textures-and-bind-groups", "the-pipeline","the-surface", "utils"]

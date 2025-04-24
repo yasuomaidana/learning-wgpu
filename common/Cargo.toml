@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wgpu = {workspace = true}
-winit = {workspace = true}
-pollster = {workspace = true}
-rayon = {workspace = true}
+wgpu = { workspace = true }
+winit = { workspace = true }
+pollster = { workspace = true }
+rayon = { workspace = true }
+image = { workspace = true }
