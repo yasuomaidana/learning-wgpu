@@ -1,10 +1,11 @@
 [package]
 name = "common"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-wgpu = {workspace = true}
-winit = {workspace = true}
-pollster = {workspace = true}
-rayon = {workspace = true}
+wgpu = { workspace = true }
+winit = { workspace = true }
+pollster = { workspace = true }
+rayon = { workspace = true }
+image = { workspace = true }

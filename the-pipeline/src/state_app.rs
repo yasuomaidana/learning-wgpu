@@ -1,8 +1,8 @@
 use crate::state::State;
 
-pub use common::event_handler::event::InputEventTrait;
 use crate::event_handler::EventHandler;
 use common::event_handler::button_click::button_click::ButtonEvent;
+pub use common::event_handler::event::InputEventTrait;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
@@ -62,7 +62,7 @@ impl ApplicationHandler for StateApplication<'_> {
                     self.event_handler.clear();
                 }
                 ButtonEvent::RightClick(click) => {
-                    if click.finished(){
+                    if click.finished() {
                         self.state.as_mut().unwrap().toggle();
                     }
                     self.state.as_mut().unwrap().update();

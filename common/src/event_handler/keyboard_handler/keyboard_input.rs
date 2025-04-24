@@ -30,8 +30,9 @@ impl InputEventTrait<'_, String> for SingleKeyboardInput {
                     .text
                     .as_ref()
                     .map(|c| c.to_string())
-                    .unwrap_or("".to_string()).to_lowercase();
-                
+                    .unwrap_or("".to_string())
+                    .to_lowercase();
+
                 if key == self.key {
                     match event {
                         KeyEvent { state, .. } => match state {

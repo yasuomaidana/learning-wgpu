@@ -1,31 +1,44 @@
-use crate::state::State;
-
-use crate::keyboard_handler::{Action, KeyboardHandler};
+use crate::key_q_s_handler::keyboard_handler::{Action, KeyboardHandler};
+use crate::state_traits::DefaultAppStateMethods;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
 
-pub struct StateApplication<'a> {
-    state: Option<State<'a>>,
+pub trait AppState: DefaultAppStateMethods {
+    fn new(window: Window) -> Self;
+    fn render(&mut self) -> Result<(), wgpu::SurfaceError>;
+}
+
+pub struct SQStateApplication<T>
+where
+    T: AppState,
+{
+    state: Option<T>,
     event_handler: KeyboardHandler,
 }
 
-impl<'a> StateApplication<'a> {
-    pub fn new() -> StateApplication<'a> {
-        StateApplication {
+impl<T> SQStateApplication<T>
+where
+    T: AppState,
+{
+    pub fn new() -> SQStateApplication<T> {
+        SQStateApplication {
             state: None,
             event_handler: KeyboardHandler::new(),
         }
     }
 }
 
-impl ApplicationHandler for StateApplication<'_> {
+impl<T> ApplicationHandler for SQStateApplication<T>
+where
+    T: AppState,
+{
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = event_loop
             .create_window(Window::default_attributes().with_title("Buffer and indices"))
             .expect("Failed to create window");
-        self.state = Some(State::new(window));
+        self.state = Some(AppState::new(window));
     }
 
     fn window_event(

@@ -1,5 +1,5 @@
-use common::event_handler::event::InputEventTrait;
-use common::event_handler::keyboard_handler::keyboard_input::SingleKeyboardInput;
+use crate::event_handler::event::InputEventTrait;
+use crate::event_handler::keyboard_handler::keyboard_input::SingleKeyboardInput;
 
 #[derive(Debug)]
 pub enum Action {

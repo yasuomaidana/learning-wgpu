@@ -1,11 +1,10 @@
 [package]
 name = "the-pipeline"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-env_logger = {workspace = true}
-wgpu = {workspace = true}
-winit = {workspace = true}
-pollster = {workspace = true}
+wgpu = { workspace = true }
+winit = { workspace = true }
+pollster = { workspace = true }
 common = { workspace = true }

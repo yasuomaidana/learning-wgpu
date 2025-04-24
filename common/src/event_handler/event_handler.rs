@@ -1,4 +1,4 @@
-use crate::event_handler::event_command::{default_compare_events, EventCommand};
+use crate::event_handler::event_command::{EventCommand, default_compare_events};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use winit::event::WindowEvent;
 
@@ -83,9 +83,7 @@ impl EventHandler {
                 self.current_command = None;
                 return None;
             }
-            {
-                Some(false)
-            }
+            { Some(false) }
         } else {
             let finished = likely_commands.iter().any(|&x| x);
             if finished {
@@ -124,8 +122,8 @@ impl EventHandler {
 #[cfg(test)]
 mod test {
     use crate::event_handler::event_command::{
-        default_compare_events, mouse_button_event_generator, pressure_event_generator,
-        EventCommand,
+        EventCommand, default_compare_events, mouse_button_event_generator,
+        pressure_event_generator,
     };
     use crate::event_handler::event_handler::EventHandler;
     use winit::event::{ElementState, MouseButton, WindowEvent};

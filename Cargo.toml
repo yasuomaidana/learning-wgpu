@@ -5,13 +5,15 @@ edition = "2024"
 
 [workspace.dependencies]
 env_logger = "0.11.8"
-wgpu = "24.0.3"
+wgpu = "25.0.0"
 winit = "0.30.9"
 pollster = "0.4.0"
 rayon = "1.10.0"
 common = { path = "common" }
+state-derive = { path = "state-derive" }
 utils = { path = "utils" }
 bytemuck = { version = "1.22.0", features = ["derive"] }
+image = { version = "0.25.6", default-features = true, features = ["jpeg", "png"] }
 
 [workspace]
-members = [ "buffer-and-indices", "common", "initial-tutorial", "textures-and-bind-groups", "the-pipeline","the-surface", "utils"]
+members = ["buffer-and-indices", "common", "initial-tutorial", "state-derive", "textures-and-bind-groups", "the-pipeline", "the-surface", "utils"]

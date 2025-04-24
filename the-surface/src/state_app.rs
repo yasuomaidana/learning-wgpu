@@ -1,5 +1,7 @@
 use crate::state::State;
-use common::event_handler::event_command::{mouse_button_event_generator, pressure_event_generator, EventCommand};
+use common::event_handler::event_command::{
+    mouse_button_event_generator, pressure_event_generator, EventCommand,
+};
 use common::event_handler::event_handler::EventHandler;
 use winit::application::ApplicationHandler;
 use winit::event::{ElementState, MouseButton, WindowEvent};
@@ -13,11 +15,17 @@ pub struct StateApplication<'a> {
 
 impl<'a> StateApplication<'a> {
     pub fn new() -> StateApplication<'a> {
-        let left_button_pressed = EventCommand::new(vec![
-            mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
-            pressure_event_generator()
-        ], Some(mouse_button_event_generator(MouseButton::Left, ElementState::Released)));
-        
+        let left_button_pressed = EventCommand::new(
+            vec![
+                mouse_button_event_generator(MouseButton::Left, ElementState::Pressed),
+                pressure_event_generator(),
+            ],
+            Some(mouse_button_event_generator(
+                MouseButton::Left,
+                ElementState::Released,
+            )),
+        );
+
         StateApplication {
             state: None,
             event_handler: EventHandler::new(vec![left_button_pressed], None),
@@ -56,7 +64,7 @@ impl ApplicationHandler for StateApplication<'_> {
                 _ => {}
             }
         }
-        
+
         let current_stored = self.event_handler.get_partial_command();
 
         if let Some(current) = current_stored {
@@ -65,7 +73,7 @@ impl ApplicationHandler for StateApplication<'_> {
                 self.state.as_mut().unwrap().update();
             }
         }
-        
+
         match read_input {
             Some(true) => {
                 self.event_handler.clear();
