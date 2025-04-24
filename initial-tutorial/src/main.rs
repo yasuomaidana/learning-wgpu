@@ -1,7 +1,7 @@
 mod app;
 
-use winit::event_loop::EventLoop;
 use crate::app::App;
+use winit::event_loop::EventLoop;
 
 pub async fn run() {
     env_logger::init();

@@ -121,16 +121,14 @@ impl<'a> State<'a> {
         let last_event = event.get_last_event();
         println!("Last event: {:?}", last_event);
         match last_event {
-            Some(last_event) => {
-                match last_event { 
-                    WindowEvent::TouchpadPressure { pressure, .. } => {
-                        self.blue = handle_pressure_event(*pressure, self.blue);
-                        true
-                    }
-                    _ => false
+            Some(last_event) => match last_event {
+                WindowEvent::TouchpadPressure { pressure, .. } => {
+                    self.blue = handle_pressure_event(*pressure, self.blue);
+                    true
                 }
-            }
-            None => false
+                _ => false,
+            },
+            None => false,
         }
     }
 

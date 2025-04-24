@@ -1,8 +1,8 @@
 use crate::state_app::StateApplication;
 
+mod event_handler;
 mod state;
 mod state_app;
-mod event_handler;
 
 pub async fn run() {
     let event_loop = winit::event_loop::EventLoop::new();

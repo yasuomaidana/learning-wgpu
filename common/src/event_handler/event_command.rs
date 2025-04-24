@@ -138,7 +138,7 @@ pub fn default_compare_events(command_1: &WindowEvent, command_2: &WindowEvent) 
 #[cfg(test)]
 mod tests {
     use crate::event_handler::event_command::{
-        default_compare_events, mouse_button_event_generator, EventCommand,
+        EventCommand, default_compare_events, mouse_button_event_generator,
     };
     use winit::event::{ElementState, MouseButton};
 

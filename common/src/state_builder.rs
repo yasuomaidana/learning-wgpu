@@ -40,15 +40,13 @@ pub fn create_surface_config(
 
 pub fn create_device(adapter: &Adapter) -> (Device, Queue) {
     adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: None,
-                memory_hints: Default::default(),
-                trace: Default::default(),
-            },
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+            label: None,
+            memory_hints: Default::default(),
+            trace: Default::default(),
+        })
         .block_on()
         .unwrap()
 }

@@ -1,15 +1,15 @@
 use crate::vertex_layout::const_values::{INDICES, VERTICES};
 use crate::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
 use crate::vertex_layout::vertex::Vertex;
+use common::key_q_s_handler::qs_state_app::AppState;
 use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline_with_buffers};
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
 use common::state_traits::DefaultAppStateMethods;
+use state_derive::DefaultAppStateMethods;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
-use common::key_q_s_handler::qs_state_app::AppState;
-use state_derive::DefaultAppStateMethods;
 // Import the DeviceExt trait to use create_buffer_init
 use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
@@ -34,7 +34,7 @@ pub struct State<'a> {
     toggled: bool,
 }
 
-impl<'a> AppState for State<'a>{
+impl<'a> AppState for State<'a> {
     fn new(window: Window) -> State<'a> {
         let window_arc = Arc::new(window);
         let size = window_arc.inner_size();

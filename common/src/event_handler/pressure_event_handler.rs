@@ -7,7 +7,7 @@ pub fn handle_pressure_event(pressure: f32, previous_pressure: f64) -> f64 {
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
