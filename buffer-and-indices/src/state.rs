@@ -5,12 +5,17 @@ use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline_wi
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
+use common::state_traits::DefaultAppStateMethods;
 use std::sync::Arc;
-use wgpu::util::DeviceExt; // Import the DeviceExt trait to use create_buffer_init
+use wgpu::util::DeviceExt;
+use common::key_q_s_handler::qs_state_app::AppState;
+use state_derive::DefaultAppStateMethods;
+// Import the DeviceExt trait to use create_buffer_init
 use wgpu::{Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
+#[derive(DefaultAppStateMethods)]
 pub struct State<'a> {
     surface: Surface<'a>,
     device: Device,
@@ -29,8 +34,8 @@ pub struct State<'a> {
     toggled: bool,
 }
 
-impl<'a> State<'a> {
-    pub fn new(window: Window) -> State<'a> {
+impl<'a> AppState for State<'a>{
+    fn new(window: Window) -> State<'a> {
         let window_arc = Arc::new(window);
         let size = window_arc.inner_size();
         // Instance is used to create surfaces and adapters
@@ -119,16 +124,7 @@ impl<'a> State<'a> {
         }
     }
 
-    pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
-        self.size = new_size;
-
-        self.config.width = new_size.width;
-        self.config.height = new_size.height;
-
-        self.surface.configure(&self.device, &self.config);
-    }
-
-    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self
             .surface
             .get_current_texture()
@@ -179,15 +175,5 @@ impl<'a> State<'a> {
         output.present();
 
         Ok(())
-    }
-
-    pub fn window(&self) -> &Window {
-        &self.window
-    }
-
-    pub fn update(&mut self) {
-        // Update the state of the application
-        self.toggled = !self.toggled;
-        self.render().unwrap();
     }
 }

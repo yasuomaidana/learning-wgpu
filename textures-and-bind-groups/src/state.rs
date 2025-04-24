@@ -1,4 +1,3 @@
-use common::state_traits::DefaultAppStateMethods;
 use crate::vertex_layout::const_values::{INDICES, VERTICES};
 use crate::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
 use crate::vertex_layout::vertex::Vertex;
@@ -9,16 +8,17 @@ use common::pipeline_builder::{
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
+use common::state_traits::DefaultAppStateMethods;
 use common::texture_builder::create_bind_group_and_layout;
 use image::GenericImageView;
 
+use common::key_q_s_handler::qs_state_app::AppState;
+use state_derive::DefaultAppStateMethods;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 use wgpu::{BindGroup, Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
-use state_derive::DefaultAppStateMethods;
-
 
 #[derive(DefaultAppStateMethods)]
 pub struct State<'a> {
@@ -40,8 +40,8 @@ pub struct State<'a> {
     diffuse_bind_groups: Vec<BindGroup>,
 }
 
-impl<'a> State<'a> {
-    pub fn new(window: Window) -> State<'a> {
+impl<'a> AppState for State<'a> {
+    fn new(window: Window) -> State<'a> {
         let window_arc = Arc::new(window);
         let size = window_arc.inner_size();
         // Instance is used to create surfaces and adapters
@@ -180,7 +180,7 @@ impl<'a> State<'a> {
     //     self.surface.configure(&self.device, &self.config);
     // }
 
-    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self
             .surface
             .get_current_texture()
@@ -230,14 +230,4 @@ impl<'a> State<'a> {
 
         Ok(())
     }
-
-    // pub fn window(&self) -> &Window {
-    //     &self.window
-    // }
-    //
-    // pub fn update(&mut self) {
-    //     // Update the state of the application
-    //     self.toggled = !self.toggled;
-    //     self.render().unwrap();
-    // }
 }

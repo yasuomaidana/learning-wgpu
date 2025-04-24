@@ -1,7 +1,7 @@
 [package]
 name = "buffer-and-indices"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 wgpu = {workspace = true}
@@ -9,3 +9,4 @@ winit = {workspace = true}
 pollster = {workspace = true}
 common = { workspace = true }
 bytemuck = { workspace = true }
+state-derive = { workspace = true }
