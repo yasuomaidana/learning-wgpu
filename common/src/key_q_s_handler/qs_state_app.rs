@@ -5,7 +5,7 @@ use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
 
-trait AppState: DefaultAppStateMethods {
+pub trait AppState: DefaultAppStateMethods {
     fn new(window: Window) -> Self;
     fn render(&mut self) -> Result<(), wgpu::SurfaceError>;
 }
