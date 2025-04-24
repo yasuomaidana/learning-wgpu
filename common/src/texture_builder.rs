@@ -1,3 +1,5 @@
+use wgpu::{BindGroup, BindGroupLayout, Sampler, Texture, TextureView};
+
 /// A macro to load an image file at compile time and extract its RGBA data and dimensions.
 ///
 /// # Parameters
@@ -139,6 +141,16 @@ pub fn create_bind_group_and_layout(
     (texture_bind_group, texture_bind_group_layout)
 }
 
+/// Generates a default texture view and sampler for a given texture.
+///
+/// # Parameters
+/// - `texture`: The `wgpu::Texture` for which the view and sampler are created.
+/// - `device`: A reference to the `wgpu::Device` used to create the sampler.
+///
+/// # Returns
+/// A tuple containing:
+/// - `TextureView`: The default view of the texture.
+/// - `Sampler`: The sampler with default settings for the texture.
 pub fn generate_default_texture_view_and_sampler(
     texture: Texture,
     device: &wgpu::Device,
