@@ -24,7 +24,7 @@ pub struct State<'a> {
     size: PhysicalSize<u32>,
     window: Arc<Window>,
     // Pipeline
-    render_pipeline: RenderPipeline,
+    render_pipelines: Vec<RenderPipeline>,
     // Vertex buffer
     vertex_buffers: Vec<wgpu::Buffer>,
     // Index buffer
@@ -32,7 +32,7 @@ pub struct State<'a> {
     // Vertices
     // num_indices: u32,
     toggled: bool,
-    diffuse_bind_group: BindGroup,
+    diffuse_bind_groups: Vec<BindGroup>,
 }
 
 impl<'a> State<'a> {
@@ -60,18 +60,30 @@ impl<'a> State<'a> {
         let surface_caps = surface.get_capabilities(&adapter);
         let config = create_surface_config(size, surface_caps);
         surface.configure(&device, &config);
-        
-        let (diffuse_rgba, dimensions) = get_rgba_image_and_dimensions!("happy-tree.png");
-        // let (metal_rgba, metal_dimensions) = get_rgba_image_and_dimensions!("metal_texture.jpg");
 
+        // Loading textures
+        let (diffuse_rgba, dimensions) = get_rgba_image_and_dimensions!("happy-tree.png");
+        let (metal_rgba, metal_dimensions) = get_rgba_image_and_dimensions!("metal_texture.jpg");
+
+        // Creating bind groups and layouts
         let (diffuse_bind_group, texture_bind_group_layout) = create_bind_group_and_layout(
             &device,
             &queue,
-            Some("Texture Bind Group"),
+            Some("Texture Label"),
             dimensions,
             &diffuse_rgba,
-            Some("Diffuse Texture"),
+            Some("Diffuse Texture Bind Layout"),
             Some("Diffuse Bind Group"),
+        );
+
+        let (metal_bind_group, metal_texture_bind_group_layout) = create_bind_group_and_layout(
+            &device,
+            &queue,
+            Some("Metal Texture Label"),
+            metal_dimensions,
+            &metal_rgba,
+            Some("Metal Texture Bind Layout"),
+            Some("Metal Bind Group"),
         );
 
         let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
@@ -104,6 +116,7 @@ impl<'a> State<'a> {
             usage: wgpu::BufferUsages::INDEX,
         });
 
+        // Creating pipelines
         let render_pipeline_layout = create_pipeline_layout_with_bind_groups(
             &device,
             "Render Pipeline Layout",
@@ -121,6 +134,22 @@ impl<'a> State<'a> {
             &[Vertex::desc()],
         );
 
+        let hex_render_pipeline_layout = create_pipeline_layout_with_bind_groups(
+            &device,
+            "Hex Render Pipeline Layout",
+            &[&metal_texture_bind_group_layout],
+        );
+        let hex_render_pipeline = create_render_pipeline_with_buffers(
+            &device,
+            &hex_render_pipeline_layout,
+            &shader,
+            &config,
+            "Hex Render Pipeline",
+            "vs_main",
+            "fs_main",
+            &[Vertex::desc()],
+        );
+
         Self {
             surface,
             device,
@@ -128,12 +157,12 @@ impl<'a> State<'a> {
             config,
             size,
             window: window_arc,
-            render_pipeline,
+            render_pipelines: vec![render_pipeline, hex_render_pipeline],
             vertex_buffers: vec![vertex_buffer, hex_vertex_buffer],
             index_buffers: vec![index_buffer, hex_index_buffer],
             // num_indices,
             toggled: false,
-            diffuse_bind_group,
+            diffuse_bind_groups: vec![diffuse_bind_group, metal_bind_group],
         }
     }
 
@@ -173,19 +202,21 @@ impl<'a> State<'a> {
                 },
             );
 
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
-
             let vertex_buffer;
             let index_buffer;
             let num_indices;
+            
             if !self.toggled {
+                render_pass.set_pipeline(&self.render_pipelines[0]);
                 vertex_buffer = &self.vertex_buffers[0];
                 index_buffer = &self.index_buffers[0];
+                render_pass.set_bind_group(0, &self.diffuse_bind_groups[0], &[]);
                 num_indices = INDICES.len() as u32;
             } else {
+                render_pass.set_pipeline(&self.render_pipelines[1]);
                 vertex_buffer = &self.vertex_buffers[1];
                 index_buffer = &self.index_buffers[1];
+                render_pass.set_bind_group(0, &self.diffuse_bind_groups[1], &[]);
                 num_indices = HEX_INDICES.len() as u32;
             }
 
