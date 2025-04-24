@@ -5,6 +5,7 @@ use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
+use common::state_traits::DefaultAppStateMethods;
 
 pub struct StateApplication<'a> {
     state: Option<State<'a>>,

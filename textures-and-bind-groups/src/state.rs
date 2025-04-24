@@ -1,3 +1,4 @@
+use common::state_traits::DefaultAppStateMethods;
 use crate::vertex_layout::const_values::{INDICES, VERTICES};
 use crate::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
 use crate::vertex_layout::vertex::Vertex;
@@ -10,12 +11,16 @@ use common::state_builder::{
 };
 use common::texture_builder::create_bind_group_and_layout;
 use image::GenericImageView;
+
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 use wgpu::{BindGroup, Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
+use state_derive::DefaultAppStateMethods;
 
+
+#[derive(DefaultAppStateMethods)]
 pub struct State<'a> {
     surface: Surface<'a>,
     device: Device,
@@ -166,14 +171,14 @@ impl<'a> State<'a> {
         }
     }
 
-    pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
-        self.size = new_size;
-
-        self.config.width = new_size.width;
-        self.config.height = new_size.height;
-
-        self.surface.configure(&self.device, &self.config);
-    }
+    // pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
+    //     self.size = new_size;
+    //
+    //     self.config.width = new_size.width;
+    //     self.config.height = new_size.height;
+    //
+    //     self.surface.configure(&self.device, &self.config);
+    // }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self
@@ -226,13 +231,13 @@ impl<'a> State<'a> {
         Ok(())
     }
 
-    pub fn window(&self) -> &Window {
-        &self.window
-    }
-
-    pub fn update(&mut self) {
-        // Update the state of the application
-        self.toggled = !self.toggled;
-        self.render().unwrap();
-    }
+    // pub fn window(&self) -> &Window {
+    //     &self.window
+    // }
+    //
+    // pub fn update(&mut self) {
+    //     // Update the state of the application
+    //     self.toggled = !self.toggled;
+    //     self.render().unwrap();
+    // }
 }
