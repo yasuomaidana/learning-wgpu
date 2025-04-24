@@ -3023,7 +3023,6 @@ name = "the-pipeline"
 version = "0.1.0"
 dependencies = [
  "common",
- "env_logger",
  "pollster",
  "wgpu",
  "winit",
