@@ -11,6 +11,7 @@ use image::GenericImageView;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 // Import the DeviceExt trait to use create_buffer_init
+use common::get_rgba_image_and_dimensions;
 use wgpu::{BindGroup, Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
@@ -61,14 +62,16 @@ impl<'a> State<'a> {
         surface.configure(&device, &config);
 
         // Embeds the image files as a byte array at compile time, making it part of the binary
-        let diffuse_bytes = include_bytes!("happy-tree.png");
+        // let diffuse_bytes = include_bytes!("happy-tree.png");
         // Decodes the byte array into an image object using the image crate
-        let diffuse_image = image::load_from_memory(diffuse_bytes).unwrap();
+        // let diffuse_image = image::load_from_memory(diffuse_bytes).unwrap();
         // Converts the image object into a texture format that WGPU can use (RGBA8)
         let diffuse_rgba = diffuse_image.to_rgba8();
 
         let dimensions = diffuse_image.dimensions();
 
+        // let diffuse_rgba = diffuse_image.to_rgba8();
+        let (diffuse_rgba, dimensions) = get_rgba_image_and_dimensions!("happy-tree.png");
         let texture_size = wgpu::Extent3d {
             width: dimensions.0,
             height: dimensions.1,
