@@ -5,6 +5,16 @@ use wgpu::{
 };
 use winit::dpi::PhysicalSize;
 
+/// Creates a `SurfaceConfiguration` for a given physical size and surface capabilities.
+///
+/// # Arguments
+///
+/// * `size` - The physical size of the surface in pixels.
+/// * `capabilities` - The capabilities of the surface, including supported formats and alpha modes.
+///
+/// # Returns
+///
+/// A `wgpu::SurfaceConfiguration` object configured with the provided size and capabilities.
 pub fn create_surface_config(
     size: PhysicalSize<u32>,
     capabilities: SurfaceCapabilities,
