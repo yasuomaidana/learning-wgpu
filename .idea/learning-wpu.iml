@@ -12,6 +12,7 @@
       <sourceFolder url="file://$MODULE_DIR$/textures-and-bind-groups/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/utils/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/state-derive/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/uniform-buffers-an-camera/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
