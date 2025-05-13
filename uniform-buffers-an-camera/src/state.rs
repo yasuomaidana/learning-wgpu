@@ -9,6 +9,7 @@ use common::state_traits::DefaultAppStateMethods;
 use common::texture_builder::create_bind_group_and_layout;
 use image::GenericImageView;
 
+use crate::camera::Camera;
 use common::key_q_s_handler::qs_state_app::AppState;
 use common::vertex_layout::const_values::{INDICES, VERTICES};
 use common::vertex_layout::vertex::Vertex;
@@ -37,9 +38,11 @@ pub struct State<'a> {
     // num_indices: u32,
     toggled: bool,
     diffuse_bind_group: BindGroup,
+    camera: Camera,
 }
 
 impl<'a> AppState for State<'a> {
+    // in the original example, it uses async, but it breaks my trait
     fn new(window: Window) -> State<'a> {
         let window_arc = Arc::new(window);
         let size = window_arc.inner_size();
@@ -116,6 +119,20 @@ impl<'a> AppState for State<'a> {
             &[Vertex::desc()],
         );
 
+        let camera = Camera {
+            // position the camera 1 unit up and 2 units back
+            // +z is out of the screen
+            eye: (0.0, 1.0, 2.0).into(),
+            // have it look at the origin
+            target: (0.0, 0.0, 0.0).into(),
+            // which way is "up"
+            up: cgmath::Vector3::unit_y(),
+            aspect: config.width as f32 / config.height as f32,
+            fovy: 45.0,
+            znear: 0.1,
+            zfar: 100.0,
+        };
+
         Self {
             surface,
             device,
@@ -129,6 +146,7 @@ impl<'a> AppState for State<'a> {
             // num_indices,
             toggled: false,
             diffuse_bind_group,
+            camera,
         }
     }
 
@@ -168,7 +186,12 @@ impl<'a> AppState for State<'a> {
                 },
             );
 
-            let _selected = if self.toggled { 1 } else { 0 };
+            if self.toggled {
+                self.camera.eye = (1.0, 0.0, 2.0).into();
+            } else {
+                self.camera.eye = (0.0, 1.0, 2.0).into();
+            }
+
             render_pass.set_pipeline(&self.render_pipeline);
             let vertex_buffer = &self.vertex_buffer;
             let index_buffer = &self.index_buffer;

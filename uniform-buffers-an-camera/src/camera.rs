@@ -1,11 +1,11 @@
 pub struct Camera {
-    eye: cgmath::Point3<f32>, // camera position
-    target: cgmath::Point3<f32>, // look at this position
-    up: cgmath::Vector3<f32>, // up direction
-    aspect: f32, // aspect ratio of the window width/height
-    fovy: f32, // field of view in the y direction
-    znear: f32,
-    zfar: f32,
+    pub(crate) eye: cgmath::Point3<f32>, // camera position
+    pub(crate) target: cgmath::Point3<f32>, // look at this position
+    pub(crate) up: cgmath::Vector3<f32>, // up direction
+    pub(crate) aspect: f32, // aspect ratio of the window width/height
+    pub(crate) fovy: f32, // field of view in the y direction
+    pub(crate) znear: f32,
+    pub(crate) zfar: f32,
 }
 
 impl Camera {
