@@ -9,3 +9,4 @@ winit = { workspace = true }
 pollster = { workspace = true }
 rayon = { workspace = true }
 image = { workspace = true }
+bytemuck = { workspace = true }
