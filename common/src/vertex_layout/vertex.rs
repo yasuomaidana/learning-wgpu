@@ -33,6 +33,7 @@ impl<'a> Vertex {
     const ATTRIBUTES: [wgpu::VertexAttribute; 2] =
         vertex_attr_array![0 => Float32x3, 1 => Float32x2];
 
+    #[allow(clippy::redundant_clone)]
     pub fn desc() -> wgpu::VertexBufferLayout<'a> {
         wgpu::VertexBufferLayout {
             array_stride: size_of::<Self>() as wgpu::BufferAddress,
