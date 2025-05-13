@@ -83,7 +83,7 @@ impl EventHandler {
                 self.current_command = None;
                 return None;
             }
-            { Some(false) }
+            Some(false)
         } else {
             let finished = likely_commands.iter().any(|&x| x);
             if finished {
