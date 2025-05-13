@@ -1,3 +1,10 @@
+use common::key_q_s_handler::qs_state_app::SQStateApplication;
+use common::run;
+use crate::state::State;
+
+mod camera;
+mod state;
+
 fn main() {
-    println!("Hello, world!");
+    pollster::block_on(run(SQStateApplication::<State>::new()));
 }
