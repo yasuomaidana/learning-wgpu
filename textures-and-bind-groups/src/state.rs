@@ -1,6 +1,3 @@
-use crate::vertex_layout::const_values::{INDICES, VERTICES};
-use crate::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
-use crate::vertex_layout::vertex::Vertex;
 use common::get_rgba_image_and_dimensions;
 use common::pipeline_builder::{
     create_pipeline_layout_with_bind_groups, create_render_pipeline_with_buffers,
@@ -19,6 +16,9 @@ use wgpu::util::DeviceExt;
 use wgpu::{BindGroup, Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
+use common::vertex_layout::const_values::{INDICES, VERTICES};
+use common::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
+use common::vertex_layout::vertex::Vertex;
 
 #[derive(DefaultAppStateMethods)]
 pub struct State<'a> {
