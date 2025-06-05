@@ -10,10 +10,13 @@ pub struct Camera {
 
 impl Camera {
     fn build_view_projection_matrix(&self) -> cgmath::Matrix4<f32> {
-        // 1. The view matrix moves the world to be at the position and rotation of the camera. 
+        // 1. The view matrix moves the world to be at the position and rotation of the camera.
         // It's essentially an inverse of whatever the transform matrix of the camera would be.
+        // eye: Where is the camera looking at
+        // target: What is the camera looking at
+        // up: Which way is up for the camera
         let view = cgmath::Matrix4::look_at_rh(self.eye, self.target, self.up);
-        // 2. The proj matrix warps the scene to give the effect of depth. 
+        // 2. The proj matrix warps the scene to give the effect of depth.
         // Without this, objects up close would be the same size as objects far away.
         let proj = cgmath::perspective(cgmath::Deg(self.fovy), self.aspect, self.znear, self.zfar);
         // 3. The coordinate system in WGPU is based on DirectX and Metal's coordinate systems.

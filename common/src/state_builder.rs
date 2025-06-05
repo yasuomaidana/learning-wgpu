@@ -129,6 +129,11 @@ pub fn create_render_pass<'b>(
 }
 
 // Here we can add the WASM specific code
+/// Creates a new `wgpu::Instance` using the primary backend.
+/// 
+/// # Returns
+/// 
+/// A `wgpu::Instance` initialized with the primary backend.
 pub fn create_gpu_instance() -> Instance {
     Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::PRIMARY,
