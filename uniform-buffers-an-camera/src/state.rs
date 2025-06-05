@@ -9,7 +9,7 @@ use common::state_traits::DefaultAppStateMethods;
 use common::texture_builder::create_bind_group_and_layout;
 use image::GenericImageView;
 
-use crate::camera::Camera;
+use crate::camera::{Camera, CameraUniform};
 use common::key_q_s_handler::qs_state_app::AppState;
 use common::vertex_layout::const_values::{INDICES, VERTICES};
 use common::vertex_layout::vertex::Vertex;
@@ -132,6 +132,40 @@ impl<'a> AppState for State<'a> {
             znear: 0.1,
             zfar: 100.0,
         };
+
+        let mut camera_uniform = CameraUniform::new();
+        camera_uniform.update_view_proj(&camera);
+        let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Camera Buffer"),
+            contents: bytemuck::cast_slice(&[camera_uniform]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+        
+        let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("Camera Bind Group Layout"),
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    // Visibility to vertex shader
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
+            ],
+        });
+        
+        let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Camera Bind Group"),
+            layout: &camera_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: camera_buffer.as_entire_binding(),
+            }],
+        });
 
         Self {
             surface,
