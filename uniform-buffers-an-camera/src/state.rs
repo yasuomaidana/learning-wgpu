@@ -41,6 +41,7 @@ pub struct State<'a> {
     camera: Camera,
     camera_uniform: CameraUniform,
     camera_bind_group: BindGroup,
+    camera_buffer: wgpu::Buffer,
 }
 
 impl<'a> AppState for State<'a> {
@@ -85,9 +86,7 @@ impl<'a> AppState for State<'a> {
             Some("Diffuse Bind Group"),
         );
 
-        let shader = device.create_shader_module(wgpu::include_wgsl!(
-            "shader.wgsl"
-        ));
+        let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
 
         // Vertex buffer
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -102,7 +101,7 @@ impl<'a> AppState for State<'a> {
             contents: bytemuck::cast_slice(&INDICES),
             usage: wgpu::BufferUsages::INDEX,
         });
-        
+
         let camera = Camera {
             // position the camera 1 unit up and 2 units back
             // +z is out of the screen
@@ -119,20 +118,20 @@ impl<'a> AppState for State<'a> {
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
-        
+
         // Create a buffer for the camera uniform
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera Buffer"),
             contents: bytemuck::cast_slice(&[camera_uniform]),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
-        
-        // Create a bind group layout for the camera, 
+
+        // Create a bind group layout for the camera,
         // It tells the GPU what kind of data we will be passing to the shader
-        let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("Camera Bind Group Layout"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
+        let camera_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some("Camera Bind Group Layout"),
+                entries: &[wgpu::BindGroupLayoutEntry {
                     binding: 0,
                     // Visibility to vertex shader
                     visibility: wgpu::ShaderStages::VERTEX,
@@ -142,10 +141,9 @@ impl<'a> AppState for State<'a> {
                         min_binding_size: None,
                     },
                     count: None,
-                },
-            ],
-        });
-        
+                }],
+            });
+
         // Create a bind group for the camera
         // It binds the camera buffer to the bind group layout
         let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -161,11 +159,13 @@ impl<'a> AppState for State<'a> {
         let render_pipeline_layout = create_pipeline_layout_with_bind_groups(
             &device,
             "Render Pipeline Layout",
-            &[&texture_bind_group_layout,
+            &[
+                &texture_bind_group_layout,
                 // it contains the bind groups
                 // since the camera's bind group layout is in the first index
                 // we will set the group to 1
-                &camera_bind_group_layout],  
+                &camera_bind_group_layout,
+            ],
         );
 
         let render_pipeline = create_render_pipeline_with_buffers(
@@ -195,6 +195,7 @@ impl<'a> AppState for State<'a> {
             camera,
             camera_uniform,
             camera_bind_group,
+            camera_buffer,
         }
     }
 
@@ -225,22 +226,34 @@ impl<'a> AppState for State<'a> {
                 },
             );
 
+            println!("Toggled {}", self.toggled);
             if self.toggled {
-                self.camera.eye = (1.0, 0.0, 2.0).into();
+                self.camera.eye = (2.0, 0.5, 2.0).into();
+                println!("Non -Toggled eye{:?}", self.camera.eye);
             } else {
                 self.camera.eye = (0.0, 1.0, 2.0).into();
+                
+                println!("Toggled eye{:?}", self.camera.eye);
             }
+            
+            self.camera_uniform.update_view_proj(&self.camera);
+            self.queue.write_buffer(
+                &self.camera_buffer,
+                0,
+                bytemuck::cast_slice(&[self.camera_uniform]),
+            );
 
             render_pass.set_pipeline(&self.render_pipeline);
             let vertex_buffer = &self.vertex_buffer;
             let index_buffer = &self.index_buffer;
-            
+
             render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
 
             let num_indices = INDICES.len() as u32;
 
             render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+
             render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
             // render_pass.draw(0..self.num_indices, 0..1);
             render_pass.draw_indexed(0..num_indices, 0, 0..1);
