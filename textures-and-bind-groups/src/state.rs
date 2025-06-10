@@ -5,20 +5,20 @@ use common::pipeline_builder::{
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
-use common::state_traits::DefaultAppStateMethods;
+use common::state_traits::{DefaultAppStateMethods, DefaultResizeWindowMethods};
 use common::texture_builder::create_bind_group_and_layout;
 use image::GenericImageView;
 
 use common::key_q_s_handler::qs_state_app::AppState;
+use common::vertex_layout::const_values::{INDICES, VERTICES};
+use common::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
+use common::vertex_layout::vertex::Vertex;
 use state_derive::DefaultAppStateMethods;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 use wgpu::{BindGroup, Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
-use common::vertex_layout::const_values::{INDICES, VERTICES};
-use common::vertex_layout::hex_values::{HEX_INDICES, HEX_VERTICES};
-use common::vertex_layout::vertex::Vertex;
 
 #[derive(DefaultAppStateMethods)]
 pub struct State<'a> {

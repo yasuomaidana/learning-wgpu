@@ -6,7 +6,7 @@ use common::pipeline_builder::{create_pipeline_layout, create_render_pipeline_wi
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
-use common::state_traits::DefaultAppStateMethods;
+use common::state_traits::{DefaultAppStateMethods, DefaultResizeWindowMethods};
 use state_derive::DefaultAppStateMethods;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;

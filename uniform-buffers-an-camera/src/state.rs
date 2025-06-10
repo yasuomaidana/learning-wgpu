@@ -5,7 +5,7 @@ use common::pipeline_builder::{
 use common::state_builder::{
     create_adapter, create_device, create_gpu_instance, create_render_pass, create_surface_config,
 };
-use common::state_traits::DefaultAppStateMethods;
+use common::state_traits::{DefaultAppStateMethods, DefaultResizeWindowMethods};
 use common::texture_builder::create_bind_group_and_layout;
 use image::GenericImageView;
 
@@ -13,14 +13,14 @@ use crate::camera::{Camera, CameraUniform};
 use common::key_q_s_handler::qs_state_app::AppState;
 use common::vertex_layout::const_values::{INDICES, VERTICES};
 use common::vertex_layout::vertex::Vertex;
-use state_derive::DefaultAppStateMethods;
+use state_derive::DefaultResizeWindowMethods;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 use wgpu::{BindGroup, Color, Device, Queue, RenderPipeline, Surface};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
-#[derive(DefaultAppStateMethods)]
+#[derive(DefaultResizeWindowMethods)]
 pub struct State<'a> {
     surface: Surface<'a>,
     device: Device,
@@ -42,6 +42,16 @@ pub struct State<'a> {
     camera_uniform: CameraUniform,
     camera_bind_group: BindGroup,
     camera_buffer: wgpu::Buffer,
+}
+
+impl DefaultAppStateMethods for State<'_> {
+    fn update(&mut self) {
+        // Update the state of the application
+        self.toggled = !self.toggled;
+        if let Err(e) = self.render() {
+            eprintln!("Render error: {:?}", e);
+        }
+    }
 }
 
 impl<'a> AppState for State<'a> {
@@ -232,10 +242,10 @@ impl<'a> AppState for State<'a> {
                 println!("Non -Toggled eye{:?}", self.camera.eye);
             } else {
                 self.camera.eye = (0.0, 1.0, 2.0).into();
-                
+
                 println!("Toggled eye{:?}", self.camera.eye);
             }
-            
+
             self.camera_uniform.update_view_proj(&self.camera);
             self.queue.write_buffer(
                 &self.camera_buffer,
