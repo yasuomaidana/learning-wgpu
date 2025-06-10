@@ -39,6 +39,8 @@ pub struct State<'a> {
     toggled: bool,
     diffuse_bind_group: BindGroup,
     camera: Camera,
+    camera_uniform: CameraUniform,
+    camera_bind_group: BindGroup,
 }
 
 impl<'a> AppState for State<'a> {
@@ -84,7 +86,7 @@ impl<'a> AppState for State<'a> {
         );
 
         let shader = device.create_shader_module(wgpu::include_wgsl!(
-            "../../textures-and-bind-groups/src/shader.wgsl"
+            "shader.wgsl"
         ));
 
         // Vertex buffer
@@ -100,25 +102,7 @@ impl<'a> AppState for State<'a> {
             contents: bytemuck::cast_slice(&INDICES),
             usage: wgpu::BufferUsages::INDEX,
         });
-
-        // Creating pipelines
-        let render_pipeline_layout = create_pipeline_layout_with_bind_groups(
-            &device,
-            "Render Pipeline Layout",
-            &[&texture_bind_group_layout],
-        );
-
-        let render_pipeline = create_render_pipeline_with_buffers(
-            &device,
-            &render_pipeline_layout,
-            &shader,
-            &config,
-            "Render Pipeline",
-            "vs_main",
-            "fs_main",
-            &[Vertex::desc()],
-        );
-
+        
         let camera = Camera {
             // position the camera 1 unit up and 2 units back
             // +z is out of the screen
@@ -135,12 +119,16 @@ impl<'a> AppState for State<'a> {
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
+        
+        // Create a buffer for the camera uniform
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera Buffer"),
             contents: bytemuck::cast_slice(&[camera_uniform]),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
         
+        // Create a bind group layout for the camera, 
+        // It tells the GPU what kind of data we will be passing to the shader
         let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("Camera Bind Group Layout"),
             entries: &[
@@ -149,7 +137,7 @@ impl<'a> AppState for State<'a> {
                     // Visibility to vertex shader
                     visibility: wgpu::ShaderStages::VERTEX,
                     ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
+                        ty: wgpu::BufferBindingType::Uniform, // Uniform means read-only data
                         has_dynamic_offset: false,
                         min_binding_size: None,
                     },
@@ -158,6 +146,8 @@ impl<'a> AppState for State<'a> {
             ],
         });
         
+        // Create a bind group for the camera
+        // It binds the camera buffer to the bind group layout
         let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Camera Bind Group"),
             layout: &camera_bind_group_layout,
@@ -166,6 +156,28 @@ impl<'a> AppState for State<'a> {
                 resource: camera_buffer.as_entire_binding(),
             }],
         });
+
+        // Creating pipelines
+        let render_pipeline_layout = create_pipeline_layout_with_bind_groups(
+            &device,
+            "Render Pipeline Layout",
+            &[&texture_bind_group_layout,
+                // it contains the bind groups
+                // since the camera's bind group layout is in the first index
+                // we will set the group to 1
+                &camera_bind_group_layout],  
+        );
+
+        let render_pipeline = create_render_pipeline_with_buffers(
+            &device,
+            &render_pipeline_layout,
+            &shader,
+            &config,
+            "Render Pipeline",
+            "vs_main",
+            "fs_main",
+            &[Vertex::desc()],
+        );
 
         Self {
             surface,
@@ -181,17 +193,10 @@ impl<'a> AppState for State<'a> {
             toggled: false,
             diffuse_bind_group,
             camera,
+            camera_uniform,
+            camera_bind_group,
         }
     }
-
-    // pub fn resize(&mut self, new_size: PhysicalSize<u32>) {
-    //     self.size = new_size;
-    //
-    //     self.config.width = new_size.width;
-    //     self.config.height = new_size.height;
-    //
-    //     self.surface.configure(&self.device, &self.config);
-    // }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self
@@ -229,7 +234,9 @@ impl<'a> AppState for State<'a> {
             render_pass.set_pipeline(&self.render_pipeline);
             let vertex_buffer = &self.vertex_buffer;
             let index_buffer = &self.index_buffer;
+            
             render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
+            render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
 
             let num_indices = INDICES.len() as u32;
 
