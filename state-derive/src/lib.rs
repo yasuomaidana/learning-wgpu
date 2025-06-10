@@ -1,17 +1,14 @@
 use proc_macro::TokenStream;
 use syn::DeriveInput;
 
-fn impl_default_app_state_methods(ast: &DeriveInput) -> TokenStream {
-    // This function is a placeholder for the actual implementation
-    // that will generate the methods for the DefaultAppStateMethods trait.
-    // The implementation will depend on the structure of the `ast` and
-    // the specific requirements of the trait.
-    let name = &ast.ident;
-    let generics = &ast.generics;
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-
+fn generate_default_resize_window_methods_impl(
+    name: &proc_macro2::Ident,
+    ty_generics: &syn::TypeGenerics,
+    where_clause: Option<&syn::WhereClause>,
+    impl_generics: &syn::ImplGenerics,
+) -> proc_macro2::TokenStream {
     quote::quote! {
-        impl #impl_generics DefaultAppStateMethods for #name #ty_generics #where_clause {
+        impl #impl_generics DefaultResizeWindowMethods for #name #ty_generics #where_clause {
             fn resize(&mut self, new_size: PhysicalSize<u32>) {
                 self.size = new_size;
 
@@ -20,10 +17,23 @@ fn impl_default_app_state_methods(ast: &DeriveInput) -> TokenStream {
 
                 self.surface.configure(&self.device, &self.config);
             }
-
-            fn window(&self) -> &Window {
+            fn window(&self) -> &winit::window::Window {
                 &self.window
             }
+        }
+    }
+}
+
+fn generate_default_app_state_methods_impl(
+    name: &proc_macro2::Ident,
+    ty_generics: &syn::TypeGenerics,
+    where_clause: Option<&syn::WhereClause>,
+    impl_generics: &syn::ImplGenerics,
+) -> proc_macro2::TokenStream {
+    let default_resize_window =
+        generate_default_resize_window_methods_impl(name, ty_generics, where_clause, impl_generics);
+    quote::quote! {
+        impl #impl_generics DefaultAppStateMethods for #name #ty_generics #where_clause {
 
             fn update(&mut self) {
                 // Update the state of the application
@@ -31,8 +41,20 @@ fn impl_default_app_state_methods(ast: &DeriveInput) -> TokenStream {
                 self.render().unwrap();
             }
         }
+        #default_resize_window
     }
-    .into()
+}
+
+fn impl_default_app_state_methods(ast: &DeriveInput) -> TokenStream {
+    // This function is a placeholder for the actual implementation
+    // that will generate the methods for the DefaultAppStateMethods trait.
+    // The implementation will depend on the structure of the `ast` and
+    // the specific requirements of the trait.
+    let name = &ast.ident;
+    let generics = &ast.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    generate_default_app_state_methods_impl(&name, &ty_generics, where_clause, &impl_generics)
+        .into()
 }
 
 #[proc_macro_derive(DefaultAppStateMethods)]
@@ -46,4 +68,16 @@ pub fn default_app_state_methods_macro(item: TokenStream) -> TokenStream {
     let abstract_syntax_tree: DeriveInput = syn::parse(item).unwrap(); // Conventionally named `ast`
     // Generate the implementation of the DefaultAppStateMethods trait
     impl_default_app_state_methods(&abstract_syntax_tree)
+}
+
+#[proc_macro_derive(DefaultResizeWindowMethods)]
+pub fn default_resize_window_methods(item: TokenStream) -> TokenStream {
+    // Parse the input tokens into a syntax tree
+    let abstract_syntax_tree: DeriveInput = syn::parse(item).unwrap(); // Conventionally named `ast`
+    // Generate the implementation of the DefaultResizeWindowMethods trait
+    let name = &abstract_syntax_tree.ident;
+    let generics = &abstract_syntax_tree.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    generate_default_resize_window_methods_impl(&name, &ty_generics, where_clause, &impl_generics)
+        .into()
 }
