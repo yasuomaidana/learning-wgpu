@@ -182,13 +182,14 @@
   },
   "active": "1666210410bcad5c",
   "lastOpenFiles": [
+    "WGPU Notes.md",
+    "WGPU Diagrams.svg",
+    "Introduction/Introduction.md",
+    "Introduction/the adapter.svg",
     "Introduction/WGPU general model.png",
     "Introduction/WGPU as Rhi.png",
-    "Introduction/Introduction.md",
-    "WGPU Diagrams.svg",
     "Untitled Diagram.svg",
     "Introduction/WGPU general model 1.png",
-    "WGPU Notes.md",
     "Introduction"
   ]
 }
