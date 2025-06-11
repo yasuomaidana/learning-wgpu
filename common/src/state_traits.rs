@@ -9,3 +9,8 @@ pub trait DefaultResizeWindowMethods {
 pub trait DefaultAppStateMethods: DefaultResizeWindowMethods {
     fn update(&mut self);
 }
+
+pub trait AppState: DefaultAppStateMethods {
+    fn new(window: Window) -> Self;
+    fn render(&mut self) -> Result<(), wgpu::SurfaceError>;
+}

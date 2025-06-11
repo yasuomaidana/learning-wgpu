@@ -7,5 +7,7 @@ mod state;
 mod vertex_layout;
 
 fn main() {
-    pollster::block_on(run(SQStateApplication::<State>::new()));
+    pollster::block_on(run(SQStateApplication::<State>::new(
+        "Buffer and Indices".to_string(),
+    )));
 }

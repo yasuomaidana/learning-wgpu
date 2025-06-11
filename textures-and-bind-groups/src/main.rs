@@ -15,5 +15,7 @@ fn main() {
         .expect("Failed to download resource");
     }
 
-    pollster::block_on(run(SQStateApplication::<State>::new()));
+    pollster::block_on(run(SQStateApplication::<State>::new(
+        "Textures and Bind Groups".to_string(),
+    )));
 }

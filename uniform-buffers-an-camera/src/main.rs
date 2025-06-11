@@ -6,5 +6,7 @@ mod camera;
 mod state;
 
 fn main() {
-    pollster::block_on(run(SQStateApplication::<State>::new()));
+    pollster::block_on(run(SQStateApplication::<State>::new(
+        "Uniform Buffers and 3D Camera".to_string(),
+    )));
 }

@@ -1,15 +1,10 @@
+use crate::key_q_s_handler::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
 use crate::key_q_s_handler::qs_keyboard::{Action, QSKeyboardHandler};
-use crate::state_traits::DefaultAppStateMethods;
+pub use crate::state_traits::{AppState, DefaultAppStateMethods};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
-use crate::key_q_s_handler::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
-
-pub trait AppState: DefaultAppStateMethods {
-    fn new(window: Window) -> Self;
-    fn render(&mut self) -> Result<(), wgpu::SurfaceError>;
-}
 
 pub struct SQStateApplication<T>
 where
@@ -17,16 +12,18 @@ where
 {
     state: Option<T>,
     event_handler: QSKeyboardHandler,
+    window_name: String,
 }
 
 impl<T> SQStateApplication<T>
 where
     T: AppState,
 {
-    pub fn new() -> SQStateApplication<T> {
+    pub fn new(window_name: String) -> SQStateApplication<T> {
         SQStateApplication {
             state: None,
             event_handler: QSKeyboardHandler::new(),
+            window_name,
         }
     }
 }
@@ -37,7 +34,7 @@ where
 {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = event_loop
-            .create_window(Window::default_attributes().with_title("Buffer and indices"))
+            .create_window(Window::default_attributes().with_title(self.window_name.as_str()))
             .expect("Failed to create window");
         self.state = Some(AppState::new(window));
     }
