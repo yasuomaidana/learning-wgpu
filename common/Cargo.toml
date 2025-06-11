@@ -10,3 +10,4 @@ pollster = { workspace = true }
 rayon = { workspace = true }
 image = { workspace = true }
 bytemuck = { workspace = true }
+keyboard-handler = { workspace = true }
