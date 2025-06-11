@@ -18,7 +18,7 @@ where
     window_name: String,
 }
 
-// Replaced with macro
+// Replaced with macro #[derive(DefaultApp)]
 // impl<T> SQStateApplication<T>
 // where
 //     T: AppState,
@@ -36,6 +36,8 @@ impl<T> ApplicationHandler for SQStateApplication<T>
 where
     T: AppState,
 {
+    implement_resumed!();
+    // Replaced with macro implement_resumed!()
     // fn resumed(&mut self, event_loop: &ActiveEventLoop) {
     //     let window = event_loop
     //         .create_window(Window::default_attributes().with_title(self.window_name.as_str()))
@@ -43,7 +45,6 @@ where
     //     self.state = Some(AppState::new(window));
     // }
 
-    implement_resumed!();
     fn window_event(
         &mut self,
         event_loop: &ActiveEventLoop,
