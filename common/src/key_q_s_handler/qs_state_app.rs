@@ -1,6 +1,7 @@
 use crate::key_q_s_handler::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
 use crate::key_q_s_handler::qs_keyboard::{Action, QSKeyboardHandler};
 pub use crate::state_traits::{AppState, DefaultAppStateMethods};
+use crate::{default_event, implement_resumed};
 use appstate_macros::DefaultApp;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
@@ -35,13 +36,14 @@ impl<T> ApplicationHandler for SQStateApplication<T>
 where
     T: AppState,
 {
-    fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        let window = event_loop
-            .create_window(Window::default_attributes().with_title(self.window_name.as_str()))
-            .expect("Failed to create window");
-        self.state = Some(AppState::new(window));
-    }
+    // fn resumed(&mut self, event_loop: &ActiveEventLoop) {
+    //     let window = event_loop
+    //         .create_window(Window::default_attributes().with_title(self.window_name.as_str()))
+    //         .expect("Failed to create window");
+    //     self.state = Some(AppState::new(window));
+    // }
 
+    implement_resumed!();
     fn window_event(
         &mut self,
         event_loop: &ActiveEventLoop,
@@ -59,18 +61,19 @@ where
             if quit {
                 event_loop.exit();
             }
-            match event {
-                WindowEvent::CloseRequested => {
-                    event_loop.exit();
-                }
-                WindowEvent::Resized(physical_size) => {
-                    self.state.as_mut().unwrap().resize(physical_size);
-                }
-                WindowEvent::RedrawRequested => {
-                    self.state.as_mut().unwrap().render().unwrap();
-                }
-                _ => {}
-            }
+            default_event!(self, event_loop, event);
+            // match event {
+            //     WindowEvent::CloseRequested => {
+            //         event_loop.exit();
+            //     }
+            //     WindowEvent::Resized(physical_size) => {
+            //         self.state.as_mut().unwrap().resize(physical_size);
+            //     }
+            //     WindowEvent::RedrawRequested => {
+            //         self.state.as_mut().unwrap().render().unwrap();
+            //     }
+            //     _ => {}
+            // }
         }
         match read_input {
             None => {}

@@ -1,6 +1,7 @@
 use crate::state::State;
 
 use crate::event_handler::EventHandler;
+use common::default_event;
 use common::event_handler::button_click::button_click::ButtonEvent;
 pub use common::event_handler::event::InputEventTrait;
 use winit::application::ApplicationHandler;
@@ -40,18 +41,7 @@ impl ApplicationHandler for StateApplication<'_> {
         let window = self.state.as_ref().unwrap().window();
 
         if window.id() == window_id && read_input.is_none() {
-            match event {
-                WindowEvent::CloseRequested => {
-                    event_loop.exit();
-                }
-                WindowEvent::Resized(physical_size) => {
-                    self.state.as_mut().unwrap().resize(physical_size);
-                }
-                WindowEvent::RedrawRequested => {
-                    self.state.as_mut().unwrap().render().unwrap();
-                }
-                _ => {}
-            }
+            default_event!(self, event_loop, event);
         }
         if let Some(button_event) = read_input {
             match button_event {
