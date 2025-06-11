@@ -1,9 +1,10 @@
-use crate::key_q_s_handler::keyboard_handler::{Action, KeyboardHandler};
+use crate::key_q_s_handler::qs_keyboard::{Action, QSKeyboardHandler};
 use crate::state_traits::DefaultAppStateMethods;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
+use crate::key_q_s_handler::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
 
 pub trait AppState: DefaultAppStateMethods {
     fn new(window: Window) -> Self;
@@ -15,7 +16,7 @@ where
     T: AppState,
 {
     state: Option<T>,
-    event_handler: KeyboardHandler,
+    event_handler: QSKeyboardHandler,
 }
 
 impl<T> SQStateApplication<T>
@@ -25,7 +26,7 @@ where
     pub fn new() -> SQStateApplication<T> {
         SQStateApplication {
             state: None,
-            event_handler: KeyboardHandler::new(),
+            event_handler: QSKeyboardHandler::new(),
         }
     }
 }
