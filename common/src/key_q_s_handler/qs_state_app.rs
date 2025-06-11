@@ -1,11 +1,13 @@
 use crate::key_q_s_handler::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
 use crate::key_q_s_handler::qs_keyboard::{Action, QSKeyboardHandler};
 pub use crate::state_traits::{AppState, DefaultAppStateMethods};
+use appstate_macros::DefaultApp;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowId};
 
+#[derive(DefaultApp)]
 pub struct SQStateApplication<T>
 where
     T: AppState,
@@ -15,18 +17,19 @@ where
     window_name: String,
 }
 
-impl<T> SQStateApplication<T>
-where
-    T: AppState,
-{
-    pub fn new(window_name: String) -> SQStateApplication<T> {
-        SQStateApplication {
-            state: None,
-            event_handler: QSKeyboardHandler::new(),
-            window_name,
-        }
-    }
-}
+// Replaced with macro
+// impl<T> SQStateApplication<T>
+// where
+//     T: AppState,
+// {
+//     pub fn new(window_name: String) -> SQStateApplication<T> {
+//         SQStateApplication {
+//             state: None,
+//             event_handler: QSKeyboardHandler::new(),
+//             window_name,
+//         }
+//     }
+// }
 
 impl<T> ApplicationHandler for SQStateApplication<T>
 where

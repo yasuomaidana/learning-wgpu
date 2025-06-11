@@ -13,6 +13,7 @@
       <sourceFolder url="file://$MODULE_DIR$/utils/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/state-derive/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/uniform-buffers-an-camera/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/appstate-macros/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/keyboard-handler/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>

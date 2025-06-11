@@ -163,6 +163,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "appstate-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "arbitrary"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -487,6 +496,7 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
+ "appstate-macros",
  "bytemuck",
  "image",
  "keyboard-handler",

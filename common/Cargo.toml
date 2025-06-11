@@ -11,3 +11,4 @@ rayon = { workspace = true }
 image = { workspace = true }
 bytemuck = { workspace = true }
 keyboard-handler = { workspace = true }
+appstate-macros = { workspace = true }
