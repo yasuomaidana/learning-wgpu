@@ -11,9 +11,10 @@ pollster = "0.4.0"
 rayon = "1.10.0"
 common = { path = "common" }
 state-derive = { path = "state-derive" }
+keyboard-handler = { path = "keyboard-handler" }
 utils = { path = "utils" }
 bytemuck = { version = "1.22.0", features = ["derive"] }
 image = { version = "0.25.6", default-features = true, features = ["jpeg", "png"] }
 
 [workspace]
-members = ["buffer-and-indices", "common", "initial-tutorial", "state-derive", "textures-and-bind-groups", "the-pipeline", "the-surface", "uniform-buffers-an-camera", "utils"]
+members = ["buffer-and-indices", "common", "initial-tutorial", "keyboard-handler", "state-derive", "textures-and-bind-groups", "the-pipeline", "the-surface", "uniform-buffers-an-camera", "utils"]
