@@ -1,6 +1,6 @@
 use crate::event_handler::event::InputEventTrait;
 use crate::event_handler::keyboard_handler::keyboard_input::SingleKeyboardInput;
-use crate::key_q_s_handler::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
+use crate::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
 use keyboard_handler::DefaultKeyboardHandler;
 
 #[derive(Debug)]

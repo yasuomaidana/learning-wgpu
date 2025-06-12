@@ -1,4 +1,4 @@
-use crate::key_q_s_handler::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
+use crate::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
 use crate::key_q_s_handler::qs_keyboard::{Action, QSKeyboardHandler};
 pub use crate::state_traits::{AppState, DefaultAppStateMethods};
 use crate::{default_event, implement_resumed};
