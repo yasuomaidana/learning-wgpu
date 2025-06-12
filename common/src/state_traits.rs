@@ -42,4 +42,13 @@ macro_rules! default_event {
             _ => {}
         }
     };
+    ($self:ident,$event_loop:ident,$event:ident, $window_id:ident) => {{
+        $self.event_handler.input(&$event);
+        let read_input = $self.event_handler.get_action();
+        let window = $self.state.as_ref().unwrap().window();
+        if window.id() == $window_id {
+            default_event!($self, $event_loop, $event);
+        }
+        read_input
+    }};
 }
