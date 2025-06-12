@@ -28,17 +28,11 @@ pub struct State<'a> {
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
     window: Arc<Window>,
-    // Pipeline
     render_pipeline: RenderPipeline,
-    // Vertex buffer
     vertex_buffer: wgpu::Buffer,
-    // Index buffer
     index_buffer: wgpu::Buffer,
-    // Vertices
-    // num_indices: u32,
-    toggled: bool,
     diffuse_bind_group: BindGroup,
-    camera: Camera,
+    pub camera: Camera,
     camera_uniform: CameraUniform,
     camera_bind_group: BindGroup,
     camera_buffer: wgpu::Buffer,
@@ -47,7 +41,6 @@ pub struct State<'a> {
 impl DefaultAppStateMethods for State<'_> {
     fn update(&mut self) {
         // Update the state of the application
-        self.toggled = !self.toggled;
         if let Err(e) = self.render() {
             eprintln!("Render error: {:?}", e);
         }
@@ -199,8 +192,6 @@ impl<'a> AppState for State<'a> {
             render_pipeline,
             vertex_buffer,
             index_buffer,
-            // num_indices,
-            toggled: false,
             diffuse_bind_group,
             camera,
             camera_uniform,
@@ -235,16 +226,6 @@ impl<'a> AppState for State<'a> {
                     a: 1.0,
                 },
             );
-
-            println!("Toggled {}", self.toggled);
-            if self.toggled {
-                self.camera.eye = (2.0, 0.5, 2.0).into();
-                println!("Non -Toggled eye{:?}", self.camera.eye);
-            } else {
-                self.camera.eye = (0.0, 1.0, 2.0).into();
-
-                println!("Toggled eye{:?}", self.camera.eye);
-            }
 
             self.camera_uniform.update_view_proj(&self.camera);
             self.queue.write_buffer(
