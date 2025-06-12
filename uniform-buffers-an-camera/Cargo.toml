@@ -13,3 +13,5 @@ pollster = { workspace = true }
 image = { workspace = true }
 state-derive = { workspace = true }
 cgmath = "0.18.0" # used to do the math related to the camera
+keyboard-handler = { workspace = true }
+appstate-macros = { workspace = true }
