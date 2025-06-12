@@ -3,6 +3,7 @@ use common::run;
 
 mod camera;
 mod camera_app;
+mod camera_controller;
 mod keyboard_handler;
 mod state;
 
