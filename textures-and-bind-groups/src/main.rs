@@ -1,5 +1,4 @@
 mod state;
-mod vertex_layout;
 
 use crate::state::State;
 use common::key_q_s_handler::qs_state_app::SQStateApplication;
@@ -16,5 +15,7 @@ fn main() {
         .expect("Failed to download resource");
     }
 
-    pollster::block_on(run(SQStateApplication::<State>::new()));
+    pollster::block_on(run(SQStateApplication::<State>::new(
+        "Textures and Bind Groups".to_string(),
+    )));
 }

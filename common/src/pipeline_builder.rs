@@ -18,6 +18,9 @@ pub fn create_pipeline_layout(device: &Device, label_name: &str) -> PipelineLayo
 /// * `device` - A reference to the `wgpu::Device` used to create the pipeline layout.
 /// * `label_name` - A string slice that specifies the label for the pipeline layout.
 /// * `bind_group_layouts` - A slice of references to `wgpu::BindGroupLayout` objects to be used in the pipeline layout.
+/// # Returns
+///
+/// A `wgpu::PipelineLayout` created with the provided bind group layouts.
 pub fn create_pipeline_layout_with_bind_groups(
     device: &Device,
     label_name: &str,

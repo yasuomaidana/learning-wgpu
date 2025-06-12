@@ -1,3 +1,15 @@
+struct CameraUniform{
+    // The camera's view matrix, which transforms world coordinates to view coordinates.
+    view_projection: mat4x4<f32>,
+}
+
+
+// @group(1) means this resource (the CameraUniform uniform buffer) is in bind group 1.
+//@binding(0) means it is the first binding in that group.
+@group(1) @binding(0)
+var<uniform> camera: CameraUniform;
+
+
 struct VertexInput {
     //This means that when vertex data is passed to the shader, 
     // the value at location 0 in the vertex buffer will be mapped 
@@ -30,7 +42,7 @@ fn vs_main(
     var out: VertexOutput;
 //    out.color = model.color;
     out.tex_coords = model.tex_coords;
-    out.clip_position = vec4<f32>(model.position, 1.0);
+    out.clip_position = camera.view_projection * vec4<f32>(model.position, 1.0);
     return out;
 }
 

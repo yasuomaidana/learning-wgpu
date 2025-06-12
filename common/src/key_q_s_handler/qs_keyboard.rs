@@ -1,5 +1,7 @@
 use crate::event_handler::event::InputEventTrait;
 use crate::event_handler::keyboard_handler::keyboard_input::SingleKeyboardInput;
+use crate::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
+use keyboard_handler::DefaultKeyboardHandler;
 
 #[derive(Debug)]
 pub enum Action {
@@ -7,13 +9,16 @@ pub enum Action {
     ChangeFigure,
 }
 
-pub struct KeyboardHandler {
+#[derive(DefaultKeyboardHandler)]
+#[action_type(Action)]
+pub struct QSKeyboardHandler {
     actions: Vec<SingleKeyboardInput>,
 }
 
-impl KeyboardHandler {
-    pub fn new() -> KeyboardHandler {
-        KeyboardHandler {
+impl KeysHandler for QSKeyboardHandler {
+    type Action = Action;
+    fn new() -> QSKeyboardHandler {
+        QSKeyboardHandler {
             actions: vec![
                 SingleKeyboardInput::new("Q".to_string()),
                 SingleKeyboardInput::new("S".to_string()),
@@ -21,13 +26,7 @@ impl KeyboardHandler {
         }
     }
 
-    pub fn input(&mut self, event: &winit::event::WindowEvent) {
-        self.actions
-            .iter_mut()
-            .for_each(|action| action.update(event));
-    }
-
-    pub fn get_action(&mut self) -> Option<Action> {
+    fn get_action(&mut self) -> Option<Action> {
         match self.actions.iter().find(|action| action.in_progress()) {
             None => None,
             Some(action) => match action.key.as_str() {
@@ -36,9 +35,5 @@ impl KeyboardHandler {
                 _ => None,
             },
         }
-    }
-
-    pub fn clear(&mut self) {
-        self.actions.iter_mut().for_each(|action| action.clear());
     }
 }

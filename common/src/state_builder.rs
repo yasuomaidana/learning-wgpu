@@ -38,6 +38,19 @@ pub fn create_surface_config(
     }
 }
 
+/// Creates a `wgpu::Device` and `wgpu::Queue` from the given `Adapter`.
+///
+/// # Arguments
+///
+/// * `adapter` - A reference to the `wgpu::Adapter` from which to request the device.
+///
+/// # Returns
+///
+/// A tuple containing the created `Device` and `Queue`.
+///
+/// # Panics
+///
+/// Panics if device creation fails.
 pub fn create_device(adapter: &Adapter) -> (Device, Queue) {
     adapter
         .request_device(&wgpu::DeviceDescriptor {
@@ -51,6 +64,20 @@ pub fn create_device(adapter: &Adapter) -> (Device, Queue) {
         .unwrap()
 }
 
+/// Creates a `wgpu::Adapter` for the given `Instance` and `Surface`.
+///
+/// # Arguments
+///
+/// * `instance` - The `wgpu::Instance` used to request the adapter.
+/// * `surface` - The `wgpu::Surface` that the adapter must be compatible with.
+///
+/// # Returns
+///
+/// A `wgpu::Adapter` suitable for rendering to the provided surface.
+///
+/// # Panics
+///
+/// Panics if no suitable adapter is found.
 pub fn create_adapter(instance: Instance, surface: &Surface) -> Adapter {
     instance
         .request_adapter(&wgpu::RequestAdapterOptions {
@@ -102,6 +129,11 @@ pub fn create_render_pass<'b>(
 }
 
 // Here we can add the WASM specific code
+/// Creates a new `wgpu::Instance` using the primary backend.
+/// 
+/// # Returns
+/// 
+/// A `wgpu::Instance` initialized with the primary backend.
 pub fn create_gpu_instance() -> Instance {
     Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::PRIMARY,
