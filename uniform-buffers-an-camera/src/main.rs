@@ -1,12 +1,13 @@
-use common::key_q_s_handler::qs_state_app::SQStateApplication;
+use crate::camera_app::CameraStateApplication;
 use common::run;
-use crate::state::State;
 
 mod camera;
+mod camera_app;
+mod keyboard_handler;
 mod state;
 
 fn main() {
-    pollster::block_on(run(SQStateApplication::<State>::new(
+    pollster::block_on(run(CameraStateApplication::new(
         "Uniform Buffers and 3D Camera".to_string(),
     )));
 }
