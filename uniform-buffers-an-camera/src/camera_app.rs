@@ -1,6 +1,6 @@
+use crate::camera_controller::CameraController;
 use crate::keyboard_handler::{Action, CameraKeyboardHandler};
 use crate::state::State;
-use appstate_macros::DefaultApp;
 use common::keyboard_handler::{DefaultKeyboardHandlerMethods, KeysHandler};
 use common::state_traits::DefaultResizeWindowMethods;
 use common::state_traits::{AppState, DefaultAppStateMethods};
@@ -11,11 +11,22 @@ use winit::event_loop::ActiveEventLoop;
 use winit::window::Window;
 use winit::window::WindowId;
 
-#[derive(DefaultApp)]
 pub struct CameraStateApplication<'a> {
     state: Option<State<'a>>,
     event_handler: CameraKeyboardHandler,
     window_name: String,
+    camera_controller: CameraController,
+}
+
+impl<'a> CameraStateApplication<'a> {
+    pub fn new(window_name: String) -> CameraStateApplication<'a> {
+        CameraStateApplication {
+            state: None,
+            event_handler: CameraKeyboardHandler::new(),
+            window_name,
+            camera_controller: CameraController::new(0.1, 0.1),
+        }
+    }
 }
 
 impl<'a> ApplicationHandler for CameraStateApplication<'a> {
