@@ -39,16 +39,16 @@ impl<'a> ApplicationHandler for CameraStateApplication<'a> {
         event: WindowEvent,
     ) {
         let read_input = default_event!(self, event_loop, event, window_id);
-
         match read_input {
             None => {}
             Some(action) => {
                 match action {
-                    Action::Down => {
+                    Action::Quit => event_loop.exit(),
+                    other => {
+                        self.camera_controller
+                            .update(other, &mut self.state.as_mut().unwrap().camera); // _ => {}
                         self.state.as_mut().unwrap().update();
                     }
-                    Action::Quit => event_loop.exit(),
-                    _ => {}
                 }
                 self.event_handler.clear();
             }
